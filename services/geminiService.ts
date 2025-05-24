@@ -42,7 +42,7 @@ export async function getAiInterpretation(
   }
 
   const ai = new GoogleGenerativeAI(apiKey);
-  const modelName = 'gemini-2.5-pro-preview-05-06';
+  const modelName = 'gemini-2.5-flash-preview-05-20';
 
   const simulationSummary = getSimulationSummary(simulationData, durationMonths);
 
