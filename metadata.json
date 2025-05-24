@@ -1,0 +1,5 @@
+{
+  "name": "SEIR Model of Online Game Addiction",
+  "description": "An interactive web application simulating the SEIR model for online game addiction among students, based on the research paper 'Model SEIR Kecanduan Game Online pada Siswa di SMP Negeri 3 Makassar' by Syafruddin Side et al. (2020). Explore how different parameters affect the spread and recovery from game addiction.",
+  "requestFramePermissions": []
+}
