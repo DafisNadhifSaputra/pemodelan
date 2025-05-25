@@ -33,9 +33,7 @@ const JournalPage: React.FC<JournalPageProps> = ({ onBack }) => {
   const r0WithIntervention = calculateR0(paramsWithIntervention);
   const r0WithoutIntervention = calculateR0(paramsWithoutIntervention);
 
-  const N_initial = DEFAULT_INITIAL_CONDITIONS.S0 + DEFAULT_INITIAL_CONDITIONS.E0 + DEFAULT_INITIAL_CONDITIONS.A0 + DEFAULT_INITIAL_CONDITIONS.R0;
-
-  useEffect(() => {
+  const N_initial = DEFAULT_INITIAL_CONDITIONS.S0 + DEFAULT_INITIAL_CONDITIONS.E0 + DEFAULT_INITIAL_CONDITIONS.A0 + DEFAULT_INITIAL_CONDITIONS.R0;  useEffect(() => {
     if (showSimulations) {
       // Run simulations for comparison
       const dataWithIntervention = runSearSimulation(
@@ -183,9 +181,7 @@ const JournalPage: React.FC<JournalPageProps> = ({ onBack }) => {
           <h2 className="text-2xl font-bold text-slate-800 dark:text-gray-100 mb-6 flex items-center">
             <span className="w-2 h-8 bg-emerald-500 rounded mr-3"></span>
             Hasil Simulasi Model
-          </h2>
-          
-          <div className="mb-6">
+          </h2>          <div className="mb-6">
             <button
               onClick={() => setShowSimulations(!showSimulations)}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -232,10 +228,10 @@ const JournalPage: React.FC<JournalPageProps> = ({ onBack }) => {
                     <h3 className="font-semibold text-slate-800 dark:text-gray-100 mb-4 bg-red-100 dark:bg-red-900/20 p-3 rounded-lg">
                       📈 Simulasi Tanpa Intervensi (θ = 0)
                     </h3>                    <div className="bg-slate-50 dark:bg-gray-700 p-4 rounded-lg border-2 border-red-200 dark:border-red-600">
-                      <div className="h-[300px] w-full">
-                        <LazyLoadWrapper fallback={<ChartSkeleton />}>
+                      <div className="h-[400px] w-full">
+                       
                           <SimulationChart data={simulationWithoutIntervention} hasIntervention={false} />
-                        </LazyLoadWrapper>
+                      
                       </div>
                     </div>
                     <div className="mt-2 text-sm text-slate-600 dark:text-gray-300 bg-red-50 dark:bg-red-900/20 p-2 rounded">
@@ -247,10 +243,10 @@ const JournalPage: React.FC<JournalPageProps> = ({ onBack }) => {
                     <h3 className="font-semibold text-slate-800 dark:text-gray-100 mb-4 bg-green-100 dark:bg-green-900/20 p-3 rounded-lg">
                       📉 Simulasi Dengan Intervensi (θ = 1)
                     </h3>                    <div className="bg-slate-50 dark:bg-gray-700 p-4 rounded-lg border-2 border-green-200 dark:border-green-600">
-                      <div className="h-[300px] w-full">
-                        <LazyLoadWrapper fallback={<ChartSkeleton />}>
+                      <div className="h-[400px] w-full">
+                       
                           <SimulationChart data={simulationWithIntervention} hasIntervention={true} />
-                        </LazyLoadWrapper>
+                        
                       </div>
                     </div>
                     <div className="mt-2 text-sm text-slate-600 dark:text-gray-300 bg-green-50 dark:bg-green-900/20 p-2 rounded">

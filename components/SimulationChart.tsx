@@ -28,10 +28,10 @@ const SimulationChart: React.FC<SimulationChartProps> = ({ data, hasIntervention
         <LineChart
           data={data}
           margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 20, // Increased bottom margin for X-axis label
+            top: 20,
+            right: 40,
+            left: 30,
+            bottom: 40, // Increased bottom margin for better X-axis label spacing
           }}
         >
         <CartesianGrid strokeDasharray="3 3" stroke="#475569" className="dark:stroke-gray-600" /> {/* slate-600 / gray-600 */}
@@ -62,7 +62,7 @@ const SimulationChart: React.FC<SimulationChartProps> = ({ data, hasIntervention
           }}
           labelFormatter={(label: number) => `Bulan ke-${label}`}
         />
-        <Legend wrapperStyle={{ color: '#e2e8f0', bottom: -5 }} /> {/* slate-200, adjusted legend position */}
+        <Legend wrapperStyle={{ color: '#e2e8f0', paddingTop: '20px' }} /> {/* slate-200, better legend spacing */}
         
         {/* Reference lines for paper expected values */}
         {showPaperReference && (
