@@ -6,8 +6,6 @@ import { runSearSimulation } from '../services/seirSimulator';
 import ThemeToggle from './ThemeToggle';
 import type { SearParams, SimulationDataPoint } from '../types';
 import { DEFAULT_PARAMS, DEFAULT_INITIAL_CONDITIONS, THETA_WITH_INTERVENTION, THETA_WITHOUT_INTERVENTION, SIMULATION_DURATION_MONTHS, TIME_STEP } from '../constants';
-import LazyLoadWrapper from './LazyLoadWrapper';
-import { ChartSkeleton } from './Skeleton';
 
 // Lazy load SimulationChart untuk performa yang lebih baik
 import { lazy } from 'react';
