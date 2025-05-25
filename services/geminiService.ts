@@ -121,6 +121,9 @@ export async function getAiChartAnalysis(
     const getChartPromptTemplate = (length: 'singkat' | 'sedang' | 'panjang') => {
       // Konteks jurnal lengkap untuk analisis grafik
       const chartJournalContext = `
+**PENTING: MODEL TELAH DIPERBARUI DARI SEIR KE SEAR**
+Jurnal asli menggunakan terminologi SEIR (Susceptible-Exposed-Infected-Recovered), namun dalam aplikasi ini model telah diperbarui menjadi SEAR (Susceptible-Exposed-Addicted-Recovered) untuk lebih tepat menggambarkan konteks kecanduan game online. Komparten "I" (Infected) sekarang menjadi "A" (Addicted).
+
 KONTEKS JURNAL PENELITIAN LENGKAP - ${paperTitle}:
 
 ${paperFullText}
@@ -467,6 +470,9 @@ export async function getAiInterpretation(
 
   // Konteks jurnal lengkap untuk AI
   const journalContext = `
+**PENTING: MODEL TELAH DIPERBARUI DARI SEIR KE SEAR**
+Jurnal asli menggunakan terminologi SEIR (Susceptible-Exposed-Infected-Recovered), namun dalam aplikasi ini model telah diperbarui menjadi SEAR (Susceptible-Exposed-Addicted-Recovered) untuk lebih tepat menggambarkan konteks kecanduan game online. Komparten "I" (Infected) sekarang menjadi "A" (Addicted).
+
 KONTEKS JURNAL PENELITIAN LENGKAP - ${paperTitle}:
 
 ${paperFullText}
