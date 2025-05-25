@@ -301,9 +301,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
     
     return parts;
   };
-
   return (
-    <div className={`prose prose-sm prose-invert max-w-none ${className}`}>
+    <div className={`prose prose-sm prose-invert max-w-none break-words overflow-hidden ${className}`}>
       {processContent(content)}
     </div>
   );

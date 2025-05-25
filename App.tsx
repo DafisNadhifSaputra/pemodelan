@@ -13,7 +13,6 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { InfoIcon, BarChartIcon, SettingsIcon, BookOpenIcon, SparklesIcon } from './components/icons';
 import LazyLoadWrapper from './components/LazyLoadWrapper';
-import { ModalSkeleton } from './components/Skeleton';
 import LoadingProgressBar from './components/LoadingProgressBar';
 
 // Lazy loaded components untuk optimasi performa
@@ -385,7 +384,7 @@ const AppContent: React.FC = () => {
         )}
 
         {isAiChatOpen && (
-          <LazyLoadWrapper fallback={<ModalSkeleton />}>
+          
             <AiChatModal
               isOpen={isAiChatOpen}
               onClose={() => setIsAiChatOpen(false)}
@@ -396,7 +395,7 @@ const AppContent: React.FC = () => {
               nInitial={N_initial}
               hasIntervention={hasIntervention}
             />
-          </LazyLoadWrapper>
+
         )}
     </div>
   );

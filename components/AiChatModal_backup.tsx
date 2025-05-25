@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CloseIcon, SendIcon, ChatIcon, EyeIcon } from './icons';
+import { CloseIcon, SendIcon, ChatIcon } from './icons';
 import LoadingSpinner from './LoadingSpinner';
-import { getAiInterpretation, getAiChartAnalysis } from '../services/geminiService';
+import { getAiInterpretation } from '../services/geminiService';
 import type { SearParams, InitialConditions, SimulationDataPoint } from '../types';
 import MarkdownRenderer from './MarkdownRenderer';
 
@@ -32,11 +32,11 @@ const AiChatModal: React.FC<AiChatModalProps> = ({
   currentR0,
   nInitial,
   hasIntervention
-}) => {  const [messages, setMessages] = useState<ChatMessage[]>([]);
+}) => {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [responseLength, setResponseLength] = useState<'singkat' | 'sedang' | 'panjang'>('sedang');
-  const [includeChartAnalysis, setIncludeChartAnalysis] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -66,9 +66,7 @@ const AiChatModal: React.FC<AiChatModalProps> = ({
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
-    setIsLoading(true);
-
-    try {
+    setIsLoading(true);    try {
       // Konteks jurnal lengkap untuk chat AI
       const journalContext = `
 KONTEKS PENELITIAN MODEL SEAR:
@@ -111,10 +109,6 @@ KONDISI SIMULASI SAAT INI:
 
 PERTANYAAN USER: ${userMessage.content}
 
-${includeChartAnalysis ? 
-'**CATATAN:** Analisis grafik AKTIF - gunakan informasi visual dari grafik simulasi untuk memberikan jawaban yang lebih akurat dan detail tentang pola kurva, tren, dan titik kritis yang terlihat.' : 
-'**CATATAN:** Analisis berbasis data numerik - fokus pada angka dan parameter simulasi.'}
-
 **INSTRUKSI FORMAT:**
 Jawab menggunakan format Markdown yang benar:
 - Gunakan ## untuk heading utama
@@ -123,37 +117,17 @@ Jawab menggunakan format Markdown yang benar:
 - Gunakan bullet points dengan - untuk list
 - Struktur jawaban dengan jelas dan mudah dipahami
 
-Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipahami dan relevan dengan teori epidemiologi kecanduan game online.`;
-
-      let response;
-      
-      if (includeChartAnalysis) {
-        // Use chart analysis with vision capabilities
-        response = await getAiChartAnalysis(
-          params,
-          initialConditions,
-          simulationData,
-          currentR0,
-          nInitial,
-          hasIntervention,
-          responseLength === 'singkat' ? 8 : responseLength === 'sedang' ? 16 : 24,
-          'simulation-chart', // Chart element ID
-          responseLength
-        );
-      } else {
-        // Use regular text-based analysis
-        response = await getAiInterpretation(
-          params,
-          initialConditions,
-          simulationData,
-          currentR0,
-          nInitial,
-          hasIntervention,
-          responseLength === 'singkat' ? 8 : responseLength === 'sedang' ? 16 : 24,
-          contextualPrompt,
-          responseLength
-        );
-      }
+Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipahami dan relevan dengan teori epidemiologi kecanduan game online.`;      const response = await getAiInterpretation(
+        params,
+        initialConditions,
+        simulationData,
+        currentR0,
+        nInitial,
+        hasIntervention,
+        responseLength === 'singkat' ? 8 : responseLength === 'sedang' ? 16 : 24,
+        contextualPrompt,
+        responseLength
+      );
 
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -185,33 +159,17 @@ Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipaha
 
   const clearChat = () => {
     setMessages([]);
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col">
+  };  if (!isOpen) return null;
+  return (    <div className="fixed inset-0 bg-black bg-opacity-75 z-50">
+      <div className="h-full flex items-start justify-center p-2 sm:p-4 pt-2 sm:pt-4 overflow-y-auto">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] h-auto flex flex-col my-1 sm:my-2">
         {/* Header */}
         <header className="flex items-center justify-between p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
           <div className="flex items-center space-x-2 md:space-x-3">
             <ChatIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-sky-400" />
             <h2 className="text-lg md:text-xl font-semibold text-blue-600 dark:text-sky-400">Chat dengan AI Gemini</h2>
-          </div>          <div className="flex items-center space-x-2">
-            {/* Chart Analysis Toggle */}
-            <div className="flex items-center space-x-1">
-              <input
-                type="checkbox"
-                id="chart-analysis"
-                checked={includeChartAnalysis}
-                onChange={(e) => setIncludeChartAnalysis(e.target.checked)}
-                className="w-3 h-3 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-              />
-              <label htmlFor="chart-analysis" className="text-xs text-slate-600 dark:text-slate-400 flex items-center">
-                <EyeIcon className="w-3 h-3 mr-1" />
-                Grafik
-              </label>
-            </div>
+          </div>
+          <div className="flex items-center space-x-2">
             {/* Response Length Selector */}
             <div className="flex items-center space-x-1">
               <label className="text-xs text-slate-400">Panjang:</label>
@@ -238,26 +196,17 @@ Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipaha
               <CloseIcon className="w-4 h-4 md:w-5 md:h-5" />
             </button>
           </div>
-        </header>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-          {messages.length === 0 && (            <div className="text-center text-slate-600 dark:text-slate-400 mt-8">
+        </header>        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0" style={{ maxHeight: 'calc(85vh - 140px)' }}>
+          {messages.length === 0 && (
+            <div className="text-center text-slate-600 dark:text-slate-400 mt-8">
               <ChatIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg mb-2">Mulai percakapan dengan AI</p>
-              <p className="text-sm mb-3">Tanyakan apapun tentang simulasi SEAR dan hasil analisis!</p>
-              <div className="text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 rounded-lg p-3 max-w-md mx-auto">
-                <div className="flex items-center justify-center mb-2">
-                  <EyeIcon className="w-4 h-4 mr-1 text-purple-500" />
-                  <span className="font-medium">Tips: Aktifkan "Grafik" untuk analisis visual</span>
-                </div>
-                <p>Mode grafik menggunakan AI Vision untuk menganalisis pola kurva, tren, dan detail visual dari simulasi.</p>
-              </div>
+              <p className="text-sm">Tanyakan apapun tentang simulasi SEAR dan hasil analisis!</p>
             </div>
           )}
           
-          {messages.map((message) => (
-            <div
+          {messages.map((message) => (            <div
               key={message.id}
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
@@ -280,9 +229,7 @@ Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipaha
                 </div>
               </div>
             </div>
-          ))}
-
-          {isLoading && (
+          ))}          {isLoading && (
             <div className="flex justify-start">
               <div className="max-w-[80%] md:max-w-[70%] rounded-lg px-4 py-3 bg-slate-100 dark:bg-slate-700">
                 <div className="flex items-center space-x-2">
@@ -298,16 +245,17 @@ Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipaha
 
         {/* Input */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex-shrink-0">
-          <div className="flex items-center space-x-3">              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={includeChartAnalysis ? "Tanyakan tentang grafik simulasi SEAR..." : "Tanyakan sesuatu tentang simulasi SEAR..."}
-                className="flex-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-slate-900 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-sky-400 focus:border-transparent"
-                disabled={isLoading}
-              />
+          <div className="flex items-center space-x-3">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Tanyakan sesuatu tentang simulasi SEAR..."
+              className="flex-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-slate-900 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-sky-400 focus:border-transparent"
+              disabled={isLoading}
+            />
             <button
               onClick={sendMessage}
               disabled={!inputValue.trim() || isLoading}
@@ -315,14 +263,10 @@ Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipaha
             >
               <SendIcon className="w-5 h-5" />
             </button>
-          </div>            <div className="mt-2 text-xs text-slate-600 dark:text-slate-500">
-              Tekan Enter untuk kirim, Shift+Enter untuk baris baru
-              {includeChartAnalysis && (
-                <span className="ml-2 text-purple-600 dark:text-purple-400">
-                  • Analisis grafik aktif
-                </span>
-              )}
-            </div>
+          </div>
+          <div className="mt-2 text-xs text-slate-600 dark:text-slate-500">
+            Tekan Enter untuk kirim, Shift+Enter untuk baris baru
+          </div>
         </div>
       </div>
     </div>
