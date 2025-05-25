@@ -80,14 +80,14 @@ export async function getAiChartAnalysis(
       switch (length) {
         case 'singkat':
           return {
-            temperature: 0.1,
+            temperature: 0.2,
             maxOutputTokens: 4096,
             topP: 0.8,
             topK: 20
           };
         case 'sedang':
           return {
-            temperature: 0.6,
+            temperature: 0.4,
             maxOutputTokens: 6096,
             topP: 0.9,
             topK: 40
@@ -95,13 +95,13 @@ export async function getAiChartAnalysis(
         case 'panjang':
           return {
             temperature: 0.7,
-            maxOutputTokens: 12000,
+            maxOutputTokens: 15000,
             topP: 0.9,
             topK: 40
           };
         default:
           return {
-            temperature: 0.6,
+            temperature: 0.4,
             maxOutputTokens: 6096,
             topP: 0.9,
             topK: 40
@@ -537,21 +537,21 @@ RINGKASAN MATEMATIS KUNCI:
         };
       case 'sedang':
         return {
-          temperature: 0.3,
+          temperature: 0.4,
           maxOutputTokens: 6096,
           topP: 0.8,
           topK: 30
         };
       case 'panjang':
         return {
-          temperature: 0.5,
-          maxOutputTokens: 12000,
+          temperature: 0.7,
+          maxOutputTokens: 15000,
           topP: 0.9,
           topK: 40
         };
       default:
         return {
-          temperature: 0.3,
+          temperature: 0.4,
           maxOutputTokens: 6096,
           topP: 0.8,
           topK: 30
