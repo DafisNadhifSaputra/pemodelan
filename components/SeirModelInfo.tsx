@@ -41,7 +41,7 @@ const SearModelInfo: React.FC<{ currentR0: number }> = ({ currentR0 }) => {
             <div><BlockMath math="\frac{dR}{dt} = (\gamma + \theta)A - \mu_2 R" /></div>
           </div>
           <div className="text-xs text-slate-600 dark:text-slate-400 mt-3 pt-2 border-t border-slate-300 dark:border-slate-600">
-            <p>Dimana <InlineMath math="\Lambda" /> (Laju Masuk Baru) = <InlineMath math="\mu_1 \times N_{0}" /></p>
+            <p>Dimana <InlineMath math="\Lambda" /> (Laju Masuk Baru) = <InlineMath math="\mu_1 \times N_{awal}" /></p>
           </div>
         </div>
       </div>
