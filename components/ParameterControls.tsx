@@ -6,6 +6,7 @@ import type { SearParams, InitialConditions, SearParameterKey, InitialConditionK
 import { THETA_WITH_INTERVENTION, THETA_WITHOUT_INTERVENTION } from '../constants';
 import HelpTooltip from './HelpTooltip';
 import CollapsibleSection from './CollapsibleSection';
+import { RefreshIcon } from './icons';
 
 interface ParameterControlsProps {
   params: Omit<SearParams, 'theta'>; 
@@ -14,6 +15,7 @@ interface ParameterControlsProps {
   onParamChange: <K extends SearParameterKey,>(paramName: K, value: number) => void;
   onInitialConditionChange: <K extends InitialConditionKey,>(conditionName: K, value: number) => void;
   onInterventionChange: (hasIntervention: boolean) => void;
+  onReset: () => void;
   N_initial: number;
 }
 
@@ -103,6 +105,7 @@ const ParameterControls: React.FC<ParameterControlsProps> = ({
   onParamChange,
   onInitialConditionChange,
   onInterventionChange,
+  onReset,
   N_initial
 }) => {
   const searParamDetails: Array<{ key: SearParameterKey; label: string; tooltip: string; min?:number; max?:number; step?:number; isAdvanced?: boolean;}> = [
@@ -128,7 +131,18 @@ const ParameterControls: React.FC<ParameterControlsProps> = ({
   return (
     <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-blue-600 dark:text-sky-400 mb-3 border-b border-slate-300 dark:border-slate-700 pb-2">Parameter Model</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold text-blue-600 dark:text-sky-400 border-b border-slate-300 dark:border-slate-700 pb-2 flex-1">Parameter Model</h3>
+          <button
+            type="button"
+            onClick={onReset}
+            className="ml-3 inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-700 dark:hover:text-slate-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+            aria-label="Reset ke nilai default"
+          >
+            <RefreshIcon className="w-4 h-4" />
+            Reset Default
+          </button>
+        </div>
         
         {/* Basic Parameters */}
         {basicParams.map(({ key, label, tooltip, min, max, step }) => (

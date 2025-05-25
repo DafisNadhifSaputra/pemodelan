@@ -199,6 +199,18 @@ const AppContent: React.FC = () => {
     setInitialConditions(prevConditions => ({ ...prevConditions, [conditionName]: value }));
   };
 
+  const handleReset = () => {
+    setParams({
+      ...DEFAULT_PARAMS,
+      theta: hasIntervention ? THETA_WITH_INTERVENTION : THETA_WITHOUT_INTERVENTION,
+    });
+    setInitialConditions(DEFAULT_INITIAL_CONDITIONS);
+    setHasIntervention(true);
+    // Clear AI interpretation when resetting
+    setAiInterpretation(null);
+    setInterpretationError(null);
+  };
+
   // Handle view switching
   if (currentView === 'journal') {
     return (
@@ -265,6 +277,7 @@ const AppContent: React.FC = () => {
               onInitialConditionChange={handleInitialConditionChange}
               onInterventionChange={setHasIntervention}
               N_initial={N_initial}
+              onReset={handleReset}
             />
           </div>
            <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
