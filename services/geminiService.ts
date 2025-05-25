@@ -88,7 +88,7 @@ export async function getAiChartAnalysis(
         case 'sedang':
           return {
             temperature: 0.6,
-            maxOutputTokens: 8192,
+            maxOutputTokens: 6096,
             topP: 0.9,
             topK: 40
           };
@@ -102,7 +102,7 @@ export async function getAiChartAnalysis(
         default:
           return {
             temperature: 0.6,
-            maxOutputTokens: 8192,
+            maxOutputTokens: 6096,
             topP: 0.9,
             topK: 40
           };
@@ -124,6 +124,10 @@ export async function getAiChartAnalysis(
 KONTEKS JURNAL PENELITIAN LENGKAP - ${paperTitle}:
 
 ${paperFullText}
+
+${compartmentDiagram}
+
+${graphicVisualization}
 
 RINGKASAN MATEMATIS KUNCI UNTUK ANALISIS GRAFIK:
 
@@ -200,170 +204,158 @@ ANALISIS GRAFIK MODEL SEAR KECANDUAN GAME ONLINE
 
 ${chartJournalContext}
 
-Anda adalah seorang ahli epidemiologi dan analis data yang memahami model SEAR. Analisis grafik simulasi ini dengan detail dalam Bahasa Indonesia.
+Anda adalah seorang ahli epidemiologi matematika. Analisis grafik simulasi dengan fokus pada HASIL NUMERIK dan ALASAN MATEMATIS mengapa kurva berperilaku seperti yang terlihat.
 
 ${baseInfo}
 
 **INSTRUKSI ANALISIS GRAFIK:**
 
-Berikan analisis menggunakan format Markdown dan notasi LaTeX untuk matematika. Struktur respons dengan heading dan subheading yang jelas.
+## 1. Analisis Kurva Berdasarkan Data Simulasi
 
-## 1. Analisis Visual Kurva
-Deskripsikan bentuk dan pola setiap kurva:
-- $S(t)$ (Susceptible): [analisis kurva biru]
-- $E(t)$ (Exposed): [analisis kurva kuning] 
-- $A(t)$ (Addicted): [analisis kurva merah]
-- $R(t)$ (Recovered): [analisis kurva hijau]
+### 1.1 Kurva Addicted A(t) [Merah] - UTAMA
+- **Pola:** Apakah A(t) naik monoton, ada puncak, atau turun dari simulasi?
+- **Nilai Kunci:** Berapa A(0), A(puncak), A(36 bulan)?
+- **Alasan:** Mengapa pola ini terjadi? Analisis $\\frac{dA}{dt} = \\beta E(t) - (\\gamma + \\theta + \\mu_2)A(t)$
+
+### 1.2 Kurva Susceptible S(t) [Biru]
+- **Tren:** Naik/turun/stabil dari ${initialConditions.S0}?
+- **Mekanisme:** Balance $\\mu_1 N$ (rekrutmen) vs $(\\alpha + \\mu_2)S$ (outflow)
+
+### 1.3 Kurva Exposed E(t) [Kuning] 
+- **Bentuk:** Linear, sigmoid, atau eksponensial?
+- **Dinamika:** $\\alpha S(t)$ (inflow) vs $(\\beta + \\mu_2)E(t)$ (outflow)
+
+### 1.4 Kurva Recovered R(t) [Hijau]
+- **Pertumbuhan:** Linear atau eksponensial?
+- **Efek Intervensi:** ${hasIntervention ? 'Dampak $(\\gamma + \\theta)A(t)$ vs $\\gamma A(t)$' : 'Hanya $\\gamma A(t)$ - pemulihan alami'}
 
 ## 2. Titik Kritis dan Transisi
-Identifikasi kapan:
-- Kurva $A(t)$ mencapai puncak
-- Kurva $S(t)$ menurun paling cepat
-- Kurva $R(t)$ mulai dominan
-- Titik ekuilibrium (jika ada)
 
-## 3. Dinamika Model SEAR
-Jelaskan transisi $S \\rightarrow E \\rightarrow A \\rightarrow R$:
-- Laju paparan: $\\alpha S$
-- Laju kecanduan: $\\beta E$ 
-- Laju pemulihan: $(\\gamma + \\theta) A$
+### 2.1 Puncak Kecanduan
+- **Kapan:** Bulan berapa A(t) mencapai maksimum?
+- **Mengapa:** Kapan $\\beta E(t) = (\\gamma + \\theta + \\mu_2)A(t)$?
+- **Dampak:** Berapa persen populasi terkena kecanduan maksimal?
 
-## 4. Interpretasi Epidemiologi
-- Analisis nilai $R_0 = \\frac{\\beta}{\\gamma + \\theta + \\mu_2}$
-- Dampak intervensi pada dinamika populasi
-- Prediksi jangka panjang
+### 2.2 Crossover Points
+- Kapan R(t) > A(t) (recovery dominan)?
+- Kapan S(t) = E(t) (equilibrium paparan)?
 
-## 5. Rekomendasi Kebijakan
-Berdasarkan pola grafik, berikan saran untuk:
-- Strategi pencegahan
-- Program intervensi
-- Monitoring populasi
+## 3. Dinamika Model dan R₀
 
-Gunakan notasi matematika LaTeX yang tepat dan format Markdown untuk struktur yang jelas.
+### 3.1 Interpretasi R₀ = ${r0.toFixed(3)}
+- **Makna:** ${r0 > 1 ? 'Kecanduan menyebar (>1)' : 'Kecanduan berkurang (<1)'}
+- **Validasi:** Apakah pola grafik A(t) sesuai prediksi R₀?
+
+### 3.2 Alur Transisi
+- **S→E:** Laju $\\alpha S$ - seberapa cepat paparan?
+- **E→A:** Laju $\\beta E$ - seberapa cepat jadi kecanduan?  
+- **A→R:** Laju $(\\gamma + \\theta) A$ - seberapa efektif pemulihan?
+
+## 4. Interpretasi Hasil dan Implikasi
+
+### 4.1 Efektivitas Intervensi (dari Grafik)
+${hasIntervention ? 
+'- **Dengan θ=1:** Bagaimana kurva A(t) dan R(t) berbeda?\\n- **Akselerasi:** Seberapa cepat intervensi mempercepat pemulihan?' : 
+'- **Tanpa θ:** Bagaimana A(t) berkembang tanpa intervensi?\\n- **Konsekuensi:** Apa dampak jangka panjang tanpa treatment?'}
+
+### 4.2 Rekomendasi Berdasarkan Grafik
+- **Target Intervensi:** Parameter mana yang paling berpengaruh pada bentuk kurva?
+- **Timing:** Kapan waktu optimal memulai intervensi berdasarkan pola kurva?
+- **Monitoring:** Indikator kurva mana yang harus dipantau ketat?
+
+**FOKUS:** Jelaskan APA yang terlihat di grafik secara numerik dan MENGAPA secara matematis. Hindari teori umum, fokus pada hasil simulasi spesifik ini.
 `;
 
         case 'panjang':
           return `
-ANALISIS KOMPREHENSIF GRAFIK MODEL SEIR KECANDUAN GAME ONLINE
+ANALISIS MENDALAM GRAFIK MODEL SEAR KECANDUAN GAME ONLINE
 
 ${chartJournalContext}
 
-${compartmentDiagram}
-
-${graphicVisualization}
-
-INSTRUKSI ANALISIS MENDALAM:
-${aiAnalysisInstructions}
-
-Anda adalah seorang ahli epidemiologi senior dan analis data lanjutan. Berikan analisis mendalam dan komprehensif dari grafik simulasi dalam Bahasa Indonesia.
+Anda adalah seorang ahli epidemiologi matematika. Berikan analisis MENDALAM dan FOKUS pada hasil simulasi dalam grafik. JANGAN BERTELE-TELE. Fokus pada ALASAN MATEMATIS dan FISIK mengapa kurva berperilaku seperti yang terlihat.
 
 ${baseInfo}
 
-**INSTRUKSI ANALISIS GRAFIK KOMPREHENSIF:**
+**INSTRUKSI ANALISIS GRAFIK MENDALAM:**
 
-Berikan analisis menggunakan format Markdown dan notasi LaTeX yang tepat. Struktur respons dengan heading yang jelas dan subheading untuk setiap section.
+## 1. ANALISIS KURVA BERDASARKAN HASIL SIMULASI AKTUAL
 
-## 1. Analisis Visual Kurva & Karakteristik Matematis
-### 1.1 Kurva Susceptible $S(t)$ [Biru]
-- Bentuk kurva dan pola matematis (eksponensial, linear, sigmoid)
-- **ANALISIS ASIMPTOTIK:** Nilai $S(\\infty)$ dan laju konvergensi
-- **ALASAN NAIK/TURUN:** Mengapa $S(t)$ naik meski ada outflow? Jelaskan balance antara rekrutmen $\\mu_1 N$ dan losses $(\\alpha + \\mu_2)S$
+### 1.1 Kurva Addicted A(t) [MERAH] - ANALISIS UTAMA
+**WAJIB ANALISIS DETAIL:**
+- Berapa nilai puncak A(t) dan kapan terjadi?
+- Mengapa puncak terjadi di waktu tersebut? Jelaskan dengan $\\frac{dA}{dt} = \\beta E(t) - (\\gamma + \\theta + \\mu_2)A(t)$
+- Kapan $\\frac{dA}{dt} = 0$ dan mengapa?
+- Bagaimana bentuk kurva setelah puncak? Eksponensial decay atau linear?
+- Berapa nilai A(36 bulan) dan bandingkan dengan A(0)?
 
-### 1.2 Kurva Exposed $E(t)$ [Kuning]  
-- Karakteristik sigmoid dan inflection point
-- **ANALISIS ASIMPTOTIK:** Kapan mencapai saturasi $E(\\infty)$
-- **ALASAN SIGMOID:** Mengapa berbentuk S? Balance antara inflow $\\alpha S$ dan outflow $(\\beta + \\mu_2)E$
+### 1.2 Kurva Susceptible S(t) [BIRU]
+**ANALISIS BERDASARKAN DATA:**
+- Apakah S(t) naik atau turun dari bulan 0-36?
+- Berapa persen penurunan/kenaikan total?
+- Mengapa tren ini terjadi? Analisis $\\frac{dS}{dt} = \\mu_1 N - (\\alpha + \\mu_2)S(t)$
+- Kapan S(t) mencapai equilibrium (jika ada)?
 
-### 1.3 Kurva Addicted $A(t)$ [Merah] - KUNCI UTAMA
-- **Tanpa intervensi:** Mengapa pertumbuhan eksponensial berkelanjutan?
-- **Dengan intervensi:** Mengapa ada puncak di bulan ~8 lalu turun drastis?
-- **ANALISIS ASIMPTOTIK:** $A(\\infty)$ untuk kedua skenario
-- **ALASAN PERUBAHAN:** Jelaskan secara detail mengapa intervensi $\\theta=1$ mengubah $\\frac{dA}{dt} = \\beta E - (\\gamma + \\theta + \\mu_2)A$ dari positif ke negatif
+### 1.3 Kurva Exposed E(t) [KUNING]
+**FOKUS PADA PERILAKU AKTUAL:**
+- Bentuk kurva: naik monoton, sigmoid, atau ada puncak?
+- Berapa nilai maksimum E(t) dan kapan tercapai?
+- Mengapa E(t) berperilaku demikian? Analisis balance $\\alpha S(t)$ vs $(\\beta + \\mu_2)E(t)$
 
-### 1.4 Kurva Recovered $R(t)$ [Hijau]
-- **Tanpa intervensi:** Mengapa pertumbuhan linear lambat?
-- **Dengan intervensi:** Mengapa eksponensial cepat setelah bulan 12?
-- **ANALISIS ASIMPTOTIK:** Perbedaan $R(\\infty)$ kedua skenario
-- **MEKANISME PERCEPATAN:** Jelaskan efek $(\\gamma + \\theta)A$ pada laju recovery
+### 1.4 Kurva Recovered R(t) [HIJAU]
+**ANALISIS PERTUMBUHAN:**
+- Apakah R(t) tumbuh linear atau eksponensial?
+- Berapa laju pertumbuhan R(t) di akhir simulasi?
+- Mengapa laju ini terjadi? Hubungkan dengan $(\\gamma + \\theta)A(t)$
 
-## 2. Titik Kritis & Fase Transisi Matematis
-### 2.1 Critical Points Analysis
-- **Puncak Kecanduan:** Mengapa tepat di bulan 8 dengan intervensi?
-- **Crossover Point:** Kapan dan mengapa $R(t) > A(t)$?
-- **Equilibrium Approach:** Waktu konvergensi ke steady state
+## 2. PERBANDINGAN DENGAN/TANPA INTERVENSI
 
-### 2.2 Delayed Response Phenomenon
-- Mengapa intervensi tidak langsung efektif?
-- Lag time antara implementasi $\\theta=1$ dan penurunan $A(t)$
-- Interpretasi biologis dari delayed response
+**JIKA ADA DATA KEDUA SKENARIO:**
+- Berapa perbedaan A(36) antara θ=0 vs θ=1?
+- Berapa bulan lebih cepat puncak A(t) dengan intervensi?
+- Bagaimana bentuk kurva R(t) berbeda antara kedua skenario?
+- Kapan crossover point R(t) > A(t) pada masing-masing skenario?
 
-## 3. Dinamika Model SEIR & Analisis Kompartemen
-### 3.1 Flow Analysis Detail
-- $\\frac{dS}{dt} = \\mu_1 N - (\\alpha + \\mu_2)S$: Net balance analysis
-- $\\frac{dE}{dt} = \\alpha S - (\\beta + \\mu_2)E$: Accumulation vs progression
-- $\\frac{dA}{dt} = \\beta E - (\\gamma + \\theta + \\mu_2)A$: KUNCI - analisis tanda
-- $\\frac{dR}{dt} = (\\gamma + \\theta)A - \\mu_2 R$: Recovery acceleration
+## 3. ALASAN MATEMATIS DETAIL
 
-### 3.2 Parameter Sensitivity dari Grafik
-- Dampak visual perubahan $\\alpha$, $\\beta$, $\\gamma$ pada kurva
-- Sensitivitas $R_0$ terhadap $\\theta$: dari 0.689 → 0.089
-- Critical threshold analysis
+### 3.1 Mengapa Puncak A(t) Terjadi?
+- Jelaskan mengapa $\\beta E(t)$ awalnya > $(\\gamma + \\theta + \\mu_2)A(t)$
+- Kapan dan mengapa kondisi berbalik menjadi $\\beta E(t)$ < $(\\gamma + \\theta + \\mu_2)A(t)$?
+- Peran E(t) dalam menentukan timing puncak A(t)
 
-## 4. Interpretasi Epidemiologi Lanjutan
-### 4.1 Basic Reproduction Number
-- $R_0 = \\frac{\\beta}{\\gamma + \\theta + \\mu_2}$: Interpretasi dari grafik
-- Mengapa $R_0 < 1$ tidak menjamin penurunan immediate?
-- Hubungan $R_0$ dengan asimptotik behavior
+### 3.2 Dinamika Sistem Post-Peak
+- Mengapa A(t) turun eksponensial setelah puncak?
+- Bagaimana feedback mechanism antara A(t) → R(t) → pengurangan pool S(t)?
+- Stabilitas jangka panjang: menuju equilibrium atau oscillation?
 
-### 4.2 Stabilitas Sistem
-- Eigenvalue analysis dari grafik pattern
-- Kecepatan konvergensi berbeda tiap kurva
-- Makna fisik dari matriks Jacobian dalam konteks kecanduan
+### 3.3 Efek Intervensi θ=1
+- Mengapa intervensi tidak langsung menurunkan A(t)?
+- Lag effect: berapa bulan sebelum dampak terlihat signifikan?
+- Mekanisme accelerated recovery: mengapa $(\\gamma + \\theta)$ lebih efektif daripada γ saja?
 
-### 4.3 Bifurcation Analysis
-- Critical intervention threshold
-- Regime change pada $\\theta = 0$ vs $\\theta = 1$
-- Implications untuk desain intervensi
+## 4. IMPLIKASI DARI HASIL NUMERIK SPESIFIK
 
-## 5. Area Under Curve & Burden Analysis
-### 5.1 Disease Burden Calculation
-- $\\int_0^{36} A(t) dt$: Total person-months kecanduan
-- Perbandingan kuantitatif kedua skenario
-- Cost-effectiveness implications
+### 4.1 Beban Kecanduan (Disease Burden)
+- Hitung area under curve A(t) untuk total person-months kecanduan
+- Berapa persen populasi yang pernah mengalami kecanduan?
+- Peak prevalence vs cumulative incidence
 
-### 5.2 Recovery Acceleration Analysis
-- $\\int_0^{36} R(t) dt$: Total recovery achieved
-- Exponential vs linear growth impact
-- Long-term sustainability
+### 4.2 Efektivitas Intervensi
+- Reduction ratio: A_max(θ=0) / A_max(θ=1)
+- Time to control: kapan A(t) < threshold tertentu?
+- Recovery acceleration factor dari kurva R(t)
 
-## 6. Validasi dengan Data Empiris SMP Negeri 3 Makassar
-### 6.1 Model Validation
-- Perbandingan grafik dengan data penelitian
-- Goodness of fit assessment
-- Parameter calibration quality
+## 5. PREDIKSI JANGKA PANJANG
 
-### 6.2 Real-world Implications
-- Generalizability ke sekolah lain
-- Scalability considerations
-- Implementation feasibility
+### 5.1 Asimptotik Behavior
+- Menuju steady state mana: Disease-free atau Endemic?
+- Berapa A(∞), E(∞), S(∞), R(∞)?
+- Time to equilibrium berdasarkan tren kurva
 
-## 7. Rekomendasi Strategis Berbasis Grafik
-### 7.1 Optimal Intervention Timing
-- Golden window berdasarkan pola kurva
-- Early intervention vs late intervention
-- Resource allocation optimization
+### 5.2 Sensitivity Analysis
+- Parameter mana yang paling berpengaruh pada bentuk kurva?
+- Critical threshold untuk θ agar A(t) turun monoton
 
-### 7.2 Monitoring Strategy
-- Key indicators dari grafik pattern
-- Early warning systems
-- Adaptive intervention protocols
-
-### 7.3 Policy Implications
-- Evidence-based recommendations
-- Risk stratification
-- Long-term sustainability
-
-**CATATAN:** Fokuskan pada **ALASAN MATEMATIS** mengapa kurva naik/turun, **ANALISIS ASIMPTOTIK** detailed, dan **INTERPRETASI FISIK** dari setiap fenomena yang terlihat di grafik. Gunakan LaTeX notation yang tepat untuk semua formula matematika.
+**FOKUS UTAMA:** Jelaskan SECARA SPESIFIK apa yang terjadi di grafik, MENGAPA terjadi secara matematis, dan APA IMPLIKASINYA. Jangan bertele-tele dengan teori umum - analisis DATA SIMULASI yang TERLIHAT di grafik!
 `;
 
         default:
@@ -562,15 +554,15 @@ RINGKASAN MATEMATIS KUNCI:
     switch (length) {
       case 'singkat':
         return {
-          temperature: 0.1,
-          maxOutputTokens: 8192,
+          temperature: 0.2,
+          maxOutputTokens: 4096,
           topP: 0.8,
           topK: 20
         };
       case 'sedang':
         return {
           temperature: 0.3,
-          maxOutputTokens: 8192,
+          maxOutputTokens: 6096,
           topP: 0.8,
           topK: 30
         };
@@ -584,7 +576,7 @@ RINGKASAN MATEMATIS KUNCI:
       default:
         return {
           temperature: 0.3,
-          maxOutputTokens: 6072,
+          maxOutputTokens: 6096,
           topP: 0.8,
           topK: 30
         };
@@ -638,38 +630,68 @@ Saran strategis berdasarkan hasil simulasi.
 
 ${baseInfo}
 
-**INSTRUKSI PENTING:**
-WAJIB gunakan format Markdown yang benar dengan struktur berikut. Pastikan menggunakan notasi LaTeX untuk matematika:
+**INSTRUKSI ANALISIS SIMULASI:**
+Berikan analisis FOKUS pada hasil simulasi menggunakan format Markdown yang jelas. Jelaskan apa yang terjadi dalam simulasi dan mengapa.
 
-## 1. Analisis Basic Reproduction Number ($R_0$)
+## 1. Hasil Simulasi Model SEAR
 
-Interpretasi nilai $R_0 = \\frac{\\beta}{\\gamma + \\theta + \\mu_2}$ dan implikasinya terhadap penyebaran kecanduan.
+### 1.1 Perjalanan Kecanduan A(t)
+- **Nilai Awal vs Akhir:** A(0) = ${initialConditions.A0} → A(36 bulan) = ?
+- **Pola Kurva:** Apakah A(t) naik monoton, mencapai puncak, atau turun?
+- **Alasan Matematis:** Mengapa pola ini terjadi berdasarkan $\\frac{dA}{dt} = \\beta E(t) - (\\gamma + \\theta + \\mu_2)A(t)$?
 
-## 2. Dinamika Transisi Kompartemen
+### 1.2 Dinamika Populasi Susceptible S(t)
+- **Tren:** Bagaimana S(t) berubah dari ${initialConditions.S0} selama 36 bulan?
+- **Mekanisme:** Balance antara rekrutmen $\\mu_1 N$ dan outflow $(\\alpha + \\mu_2)S$
 
-Analisis bagaimana individu berpindah: $S \\xrightarrow{\\alpha} E \\xrightarrow{\\beta} A \\xrightarrow{\\gamma + \\theta} R$
+### 1.3 Transisi E(t) dan Pemulihan R(t)
+- **Exposed:** Bagaimana E(t) berkembang dari ${initialConditions.E0}?
+- **Recovery:** Laju pemulihan R(t) dari ${initialConditions.R0}
+- **Efek Intervensi:** ${hasIntervention ? 'Dampak θ=1 pada akselerasi pemulihan' : 'Pemulihan hanya mengandalkan γ alami'}
 
-## 3. Dampak Parameter Terhadap Simulasi
+## 2. Analisis Basic Reproduction Number
 
-Evaluasi bagaimana setiap parameter memengaruhi bentuk kurva dan hasil akhir.
+### 2.1 Interpretasi R₀ = ${r0.toFixed(3)}
+- **Makna:** $R_0 = \\frac{\\beta}{\\gamma + \\theta + \\mu_2} = \\frac{${params.beta.toFixed(3)}}{${(params.gamma + (hasIntervention ? 1 : 0) + params.mu2).toFixed(3)}} = ${r0.toFixed(3)}$
+- **Implikasi:** ${r0 > 1 ? 'Kecanduan akan menyebar (R₀ > 1)' : 'Kecanduan akan berkurang (R₀ < 1)'}
+- **Validasi:** Apakah hasil simulasi konsisten dengan prediksi R₀?
 
-## 4. Evaluasi Intervensi
+## 3. Dampak Parameter dan Intervensi
 
-${hasIntervention ? 'Analisis efektivitas intervensi ($\\theta = 1$) berdasarkan teori model SEAR.' : 'Dampak tidak adanya intervensi ($\\theta = 0$) pada dinamika populasi.'}
+### 3.1 Evaluasi Parameter
+- **α (paparan):** ${params.alpha.toFixed(3)} vs penelitian 0.438 - dampak pada laju S→E
+- **β (kecanduan):** ${params.beta.toFixed(3)} vs penelitian 0.102 - dampak pada laju E→A  
+- **γ (pemulihan):** ${params.gamma.toFixed(3)} vs penelitian 0.051 - dampak pada A→R
 
-## 5. Rekomendasi Strategis
+### 3.2 Efektivitas Intervensi
+**${hasIntervention ? 'DENGAN INTERVENSI:' : 'TANPA INTERVENSI:'}**
+- ${hasIntervention ? 'θ=1 meningkatkan recovery rate dari γ menjadi (γ+θ)' : 'Hanya mengandalkan recovery rate γ alami'}
+- **Perbandingan:** Penelitian menunjukkan pengurangan dari 200 → 26 kecanduan dalam 36 bulan
+- **Hasil Simulasi:** Bagaimana prediksi simulasi anda dibandingkan penelitian?
 
-Saran berdasarkan hasil simulasi untuk:
-- **Pencegahan**: Mengurangi paparan ($\\alpha$)
-- **Intervensi**: Meningkatkan pemulihan ($\\gamma + \\theta$)
-- **Monitoring**: Parameter kunci yang perlu dipantau
+## 4. Dinamika Transisi S→E→A→R
 
-**FORMAT REQUIREMENTS:**
-- Gunakan heading dengan ## untuk section utama
-- Gunakan **bold** untuk emphasis penting
-- Gunakan notasi LaTeX dengan $ untuk inline math dan $$ untuk block math
-- Gunakan bullet points dengan - untuk list
-- Berikan analisis ilmiah yang mudah dipahami dan terstruktur
+### 4.1 Alur Transisi
+- **S→E:** Laju $\\alpha S$ - seberapa cepat paparan game online?
+- **E→A:** Laju $\\beta E$ - seberapa cepat berkembang menjadi kecanduan?
+- **A→R:** Laju $(\\gamma + \\theta) A$ - seberapa efektif pemulihan?
+
+### 4.2 Bottleneck Analysis
+- Mana tahap yang menjadi bottleneck dalam proses kecanduan?
+- Parameter mana yang paling berpengaruh pada hasil akhir?
+
+## 5. Prediksi dan Rekomendasi
+
+### 5.1 Proyeksi Jangka Panjang
+- **Equilibrium:** Menuju bebas kecanduan atau endemik?
+- **Time Scale:** Berapa lama untuk mencapai keseimbangan?
+
+### 5.2 Strategi Intervensi
+- **Pencegahan:** Fokus menurunkan α (paparan) atau β (transisi ke kecanduan)?
+- **Treatment:** Meningkatkan γ (pemulihan alami) atau θ (intervensi)?
+- **Timing:** Kapan waktu optimal memulai intervensi?
+
+**FOKUS:** Analisis hasil simulasi spesifik anda dengan explanation matematis yang jelas. Gunakan data numerik aktual dari simulasi untuk mendukung analisis.
 `;
 
       case 'panjang':
@@ -677,91 +699,106 @@ Saran berdasarkan hasil simulasi untuk:
 
 ${baseInfo}
 
-**INSTRUKSI KOMPREHENSIF:**
-Berikan analisis mendalam dan lengkap dengan struktur Markdown yang rapi dan notasi LaTeX:
+**INSTRUKSI ANALISIS MENDALAM HASIL SIMULASI:**
 
-## 1. Analisis Mendalam Basic Reproduction Number ($R_0$)
+Berikan analisis FOKUS pada hasil simulasi yang spesifik. JANGAN BERTELE-TELE dengan teori umum. Analisis APA yang terjadi di simulasi ini dan MENGAPA secara matematis dan fisik.
 
-### 1.1 Interpretasi Matematis
-Jelaskan secara detail perhitungan $R_0 = \\frac{\\beta}{\\gamma + \\theta + \\mu_2}$ dan konteks epidemiologi.
+## 1. ANALISIS HASIL SIMULASI SPESIFIK
 
-### 1.2 Implikasi Threshold
-Analisis kriteria $R_0 > 1$ vs $R_0 < 1$ dan konsekuensinya pada penyebaran kecanduan.
+### 1.1 Perjalanan Kecanduan A(t)
+**BERDASARKAN HASIL SIMULASI:**
+- Nilai awal A(0) = ${initialConditions.A0}, berapa A(36 bulan)?
+- Apakah A(t) naik monoton, ada puncak, atau turun?
+- Jika ada puncak: kapan terjadi dan berapa nilai maksimumnya?
+- **ALASAN MATEMATIS:** Mengapa pola ini terjadi? Analisis $\\frac{dA}{dt} = \\beta E(t) - (\\gamma + \\theta + \\mu_2)A(t)$
 
-### 1.3 Perbandingan dengan Literatur
-Bandingkan dengan nilai $R_0$ dalam studi epidemiologi kecanduan lainnya.
+### 1.2 Dinamika Susceptible S(t)
+**ANALISIS NUMERIK:**
+- S(0) = ${initialConditions.S0}, bagaimana tren S(t) selama 36 bulan?
+- Berapa persen populasi yang masih susceptible di akhir simulasi?
+- **PENJELASAN FISIK:** Mengapa S(t) berperilaku demikian? Kompetisi antara $\\mu_1 N$ (rekrutmen) vs $(\\alpha + \\mu_2)S$ (keluar dari S)
 
-## 2. Dinamika Kompartemen dan Transisi
+### 1.3 Proses Exposed → Addicted
+**DETAIL TRANSISI:**
+- E(0) = ${initialConditions.E0}, bagaimana E(t) berkembang?
+- Berapa lama rata-rata seseorang di kompartemen E sebelum menjadi A?
+- **MEKANISME:** Mengapa tidak semua E langsung menjadi A? Peran $\\beta$ dan $\\mu_2$
 
-### 2.1 Alur Transisi $S \\rightarrow E \\rightarrow A \\rightarrow R$
-Jelaskan detail setiap transisi dengan persamaan diferensial.
+### 1.4 Pemulihan R(t)
+**ANALISIS RECOVERY:**
+- R(0) = ${initialConditions.R0}, berapa total yang pulih di bulan 36?
+- Apakah laju pemulihan meningkat seiring waktu atau konstan?
+- **EFEK INTERVENSI:** ${hasIntervention ? 'Bagaimana θ=1 mempercepat R(t)? Jelaskan $(\\gamma + \\theta)A(t)$ vs $\\gamma A(t)$' : 'Tanpa intervensi, mengapa R(t) tumbuh lambat? Analisis $\\gamma A(t)$ saja'}
 
-### 2.2 Analisis Steady State
-Tentukan titik kesetimbangan jangka panjang sistem.
+## 2. BASIC REPRODUCTION NUMBER R₀ = ${r0.toFixed(3)}
 
-### 2.3 Faktor-faktor yang Mempengaruhi Transisi
-Analisis bagaimana perubahan parameter memengaruhi laju transisi.
+### 2.1 Interpretasi Nilai R₀
+**MAKNA EPIDEMIOLOGI:**
+- R₀ = ${r0.toFixed(3)} ${r0 > 1 ? '> 1: Kecanduan akan menyebar dan menjadi endemik' : '< 1: Kecanduan akan berkurang dan hilang secara alami'}
+- **PERHITUNGAN:** $R_0 = \\frac{\\beta}{\\gamma + \\theta + \\mu_2} = \\frac{${params.beta.toFixed(3)}}{${params.gamma.toFixed(3)} + ${hasIntervention ? '1' : '0'} + ${params.mu2.toFixed(3)}} = ${r0.toFixed(3)}$
 
-## 3. Evaluasi Parameter dan Sensitivitas
+### 2.2 Konsekuensi R₀ pada Hasil Simulasi
+**VALIDASI DENGAN SIMULASI:**
+- Apakah hasil simulasi A(t) konsisten dengan prediksi R₀?
+- ${r0 > 1 ? 'Mengapa kecanduan terus meningkat meski ada pemulihan?' : 'Mengapa kecanduan berkurang meski ada paparan baru?'}
+- Waktu untuk mencapai keseimbangan berdasarkan R₀
 
-### 3.1 Analisis Sensitivitas Parameter
-Evaluasi dampak perubahan $\\alpha$, $\\beta$, $\\gamma$, $\\mu_1$, $\\mu_2$ pada dinamika.
+## 3. EFEK PARAMETER PADA HASIL AKTUAL
+
+### 3.1 Sensitivitas Parameter
+**DAMPAK PADA SIMULASI:**
+- $\\alpha$ = ${params.alpha.toFixed(3)}: Seberapa cepat S → E? Bandingkan dengan nilai penelitian 0.438
+- $\\beta$ = ${params.beta.toFixed(3)}: Seberapa cepat E → A? Bandingkan dengan nilai penelitian 0.102  
+- $\\gamma$ = ${params.gamma.toFixed(3)}: Laju pemulihan alami, bandingkan dengan 0.051
 
 ### 3.2 Validasi dengan Data Empiris
-Bandingkan hasil simulasi dengan data epidemiologi sebenarnya.
+**PERBANDINGAN KUANTITATIF:**
+- Penelitian: tanpa intervensi → 200 kecanduan dalam 36 bulan
+- Penelitian: dengan intervensi → 26 kecanduan dalam 36 bulan  
+- **SIMULASI ANDA:** Berapa prediksi kecanduan pada bulan 36?
+- Apakah tren simulasi sesuai dengan temuan penelitian?
 
-### 3.3 Uncertainty Quantification
-Diskusikan ketidakpastian dalam estimasi parameter.
+## 4. ANALISIS INTERVENSI θ
 
-## 4. Analisis Intervensi Komprehensif
+### 4.1 Mekanisme Kerja Intervensi
+**${hasIntervention ? 'DENGAN INTERVENSI (θ=1)' : 'TANPA INTERVENSI (θ=0)'}:**
+- ${hasIntervention ? 'Bagaimana θ=1 mengubah persamaan $\\frac{dA}{dt}$? Efek pada laju pemulihan $(\\gamma + 1)A$' : 'Tanpa intervensi, hanya mengandalkan γA untuk pemulihan alami'}
+- **DAMPAK NUMERIK:** ${hasIntervention ? 'Recovery rate meningkat dari γ=0.051 menjadi (γ+θ)=1.051' : 'Recovery rate tetap rendah di γ=0.051'}
 
-### 4.1 Mekanisme Intervensi ($\\theta$)
-${hasIntervention ? 
-'Jelaskan detail bagaimana intervensi bekerja: konseling, terapi kelompok, program rehabilitasi.' : 
-'Analisis konsekuensi tidak adanya intervensi terstruktur.'}
+### 4.2 Timing dan Efektivitas
+**ANALISIS TEMPORAL:**
+- ${hasIntervention ? 'Berapa bulan setelah implementasi baru terlihat dampak signifikan?' : 'Tanpa intervensi, kapan A(t) mencapai plateau atau terus naik?'}
+- **COST-EFFECTIVENESS:** Berapa person-months kecanduan yang dicegah?
 
-### 4.2 Cost-Effectiveness Analysis
-Evaluasi efektivitas biaya dari program intervensi.
+## 5. PREDIKSI JANGKA PANJANG
 
-### 4.3 Optimal Timing Intervention
-Tentukan waktu optimal untuk memulai intervensi.
+### 5.1 Equilibrium Analysis
+**STEADY STATE:**
+- Menuju keseimbangan bebas kecanduan (A*=0) atau endemik (A*>0)?
+- Berapa proporsi akhir: S*, E*, A*, R*?
+- **TIME TO EQUILIBRIUM:** Berapa tahun untuk mencapai 95% nilai equilibrium?
 
-## 5. Implikasi Kesehatan Masyarakat
+### 5.2 Scenario Planning
+**IMPLIKASI KEBIJAKAN:**
+- Apa yang terjadi jika intervensi dihentikan di bulan 24?
+- Berapa minimal θ yang diperlukan untuk R₀ < 1?
+- **THRESHOLD ANALYSIS:** Critical point untuk kontrol kecanduan
 
-### 5.1 Burden of Disease
-Hitung beban penyakit kecanduan game online pada populasi.
+## 6. REKOMENDASI BERDASARKAN HASIL SIMULASI
 
-### 5.2 Health Economics Impact
-Analisis dampak ekonomi kesehatan jangka pendek dan panjang.
+### 6.1 Strategi Berbasis Evidence
+**BERDASARKAN HASIL NUMERIK:**
+- Parameter mana yang paling efektif untuk diintervensi?
+- Timing optimal untuk memulai program pencegahan
+- **RESOURCE ALLOCATION:** Fokus pada pencegahan (↓α) atau treatment (↑γ,θ)?
 
-### 5.3 Population-level Strategies
-Strategi pencegahan tingkat populasi berdasarkan model.
+### 6.2 Monitoring Key Indicators
+**EARLY WARNING SYSTEM:**
+- Indikator mana yang perlu dipantau ketat?
+- Threshold values untuk trigger intervention
+- **ADAPTIVE STRATEGY:** Kapan intensitas intervensi bisa dikurangi?
 
-## 6. Rekomendasi Policy dan Implementasi
-
-### 6.1 Evidence-based Policy Recommendations
-Rekomendasi kebijakan berdasarkan bukti dari simulasi.
-
-### 6.2 Implementation Framework
-Kerangka implementasi program intervensi.
-
-### 6.3 Monitoring and Evaluation
-Sistem monitoring dan evaluasi program.
-
-## 7. Limitasi dan Future Research
-
-### 7.1 Model Limitations
-Diskusikan batasan model SEAR dalam konteks kecanduan game.
-
-### 7.2 Future Research Directions
-Saran untuk penelitian lanjutan dan pengembangan model.
-
-**FORMAT REQUIREMENTS:**
-- Gunakan sub-heading dengan ### untuk detail
-- Sertakan persamaan matematis dalam display math: $$equation$$
-- Gunakan tabel jika diperlukan dengan format Markdown
-- Minimal 1500 kata dengan analisis mendalam
-- Referensi teori epidemiologi dan psikologi yang relevan
+**FOKUS UTAMA:** Analisis mendalam HASIL SIMULASI SPESIFIK anda, bukan teori umum. Jelaskan APA yang terjadi secara numerik dan MENGAPA secara matematis/fisik. Berikan insight praktis berdasarkan data simulasi aktual.
 `;
 
       default:
