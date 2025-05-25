@@ -5,8 +5,6 @@ import type { SearParams, InitialConditions, SimulationDataPoint, SearParameterK
 import { runSearSimulation } from './services/seirSimulator';
 import { getAiInterpretation, getAiChartAnalysis } from './services/geminiService';
 import ParameterControls from './components/ParameterControls';
-import PresetConfigurations from './components/PresetConfigurations';
-import type { Preset } from './components/PresetConfigurations';
 import SearModelInfo from './components/SeirModelInfo';
 import ThemeToggle from './components/ThemeToggle';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -201,19 +199,6 @@ const AppContent: React.FC = () => {
     setInitialConditions(prevConditions => ({ ...prevConditions, [conditionName]: value }));
   };
 
-  const handlePresetSelect = (preset: Preset) => {
-    const fullParams: SearParams = {
-      ...preset.params,
-      theta: preset.hasIntervention ? THETA_WITH_INTERVENTION : THETA_WITHOUT_INTERVENTION
-    };
-    setParams(fullParams);
-    setInitialConditions(preset.initialConditions);
-    setHasIntervention(preset.hasIntervention);
-    // Clear previous AI interpretation when changing presets
-    setAiInterpretation(null);
-    setInterpretationError(null);
-  };
-
   // Handle view switching
   if (currentView === 'journal') {
     return (
@@ -272,7 +257,6 @@ const AppContent: React.FC = () => {
             <h2 className="text-xl md:text-2xl font-semibold mb-4 text-blue-600 dark:text-sky-400 flex items-center">
               <SettingsIcon className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Konfigurasi Model
             </h2>
-            <PresetConfigurations onPresetSelect={handlePresetSelect} />
             <ParameterControls
               params={params}
               initialConditions={initialConditions}
