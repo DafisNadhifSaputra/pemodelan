@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, lazy } from 'react';
 
-import { DEFAULT_PARAMS, DEFAULT_INITIAL_CONDITIONS, SIMULATION_DURATION_MONTHS, TIME_STEP, THETA_WITH_INTERVENTION, THETA_WITHOUT_INTERVENTION } from './constants';
+import { DEFAULT_PARAMS, DEFAULT_INITIAL_CONDITIONS, DEFAULT_SIMULATION_DURATION_MONTHS, TIME_STEP, THETA_WITH_INTERVENTION, THETA_WITHOUT_INTERVENTION } from './constants';
 import type { SearParams, InitialConditions, SimulationDataPoint, SearParameterKey, InitialConditionKey, AiInterpretationResponse } from './types';
 import { runSearSimulation } from './services/seirSimulator';
 import { getAiInterpretation, getAiChartAnalysis } from './services/geminiService';
@@ -32,6 +32,7 @@ const AppContent: React.FC = () => {
     theta: hasIntervention ? THETA_WITH_INTERVENTION : THETA_WITHOUT_INTERVENTION,
   });
   const [initialConditions, setInitialConditions] = useState<InitialConditions>(DEFAULT_INITIAL_CONDITIONS);
+  const [simulationDuration, setSimulationDuration] = useState<number>(DEFAULT_SIMULATION_DURATION_MONTHS);
   const [simulationData, setSimulationData] = useState<SimulationDataPoint[]>([]);
   const [currentR0, setCurrentR0] = useState<number>(0);
 
@@ -76,12 +77,12 @@ const AppContent: React.FC = () => {
       params,
       initialConditions,
       N_val,
-      SIMULATION_DURATION_MONTHS,
+      simulationDuration,
       TIME_STEP
     );
     setSimulationData(data);
     setCurrentR0(calculateR0(params));
-  }, [params, initialConditions, calculateR0]);
+  }, [params, initialConditions, simulationDuration, calculateR0]);
 
   const fetchAndSetAiInterpretation = async (
     currentParams: SearParams,
@@ -105,7 +106,7 @@ const AppContent: React.FC = () => {
         r0,
         nInitial,
         interventionStatus,
-        SIMULATION_DURATION_MONTHS,
+        simulationDuration,
         undefined,
         responseLength
       );
@@ -149,7 +150,7 @@ const AppContent: React.FC = () => {
         r0,
         nInitial,
         interventionStatus,
-        SIMULATION_DURATION_MONTHS,
+        simulationDuration,
         'simulation-chart', // Chart element ID
         responseLength || 'sedang'
       );
@@ -199,12 +200,17 @@ const AppContent: React.FC = () => {
     setInitialConditions(prevConditions => ({ ...prevConditions, [conditionName]: value }));
   };
 
+  const handleSimulationDurationChange = (duration: number) => {
+    setSimulationDuration(duration);
+  };
+
   const handleReset = () => {
     setParams({
       ...DEFAULT_PARAMS,
       theta: hasIntervention ? THETA_WITH_INTERVENTION : THETA_WITHOUT_INTERVENTION,
     });
     setInitialConditions(DEFAULT_INITIAL_CONDITIONS);
+    setSimulationDuration(DEFAULT_SIMULATION_DURATION_MONTHS);
     setHasIntervention(true);
     // Clear AI interpretation when resetting
     setAiInterpretation(null);
@@ -272,9 +278,11 @@ const AppContent: React.FC = () => {
             <ParameterControls
               params={params}
               initialConditions={initialConditions}
+              simulationDuration={simulationDuration}
               hasIntervention={hasIntervention}
               onParamChange={handleParamChange}
               onInitialConditionChange={handleInitialConditionChange}
+              onSimulationDurationChange={handleSimulationDurationChange}
               onInterventionChange={setHasIntervention}
               N_initial={N_initial}
               onReset={handleReset}
@@ -291,7 +299,7 @@ const AppContent: React.FC = () => {
         <div className="xl:col-span-2 space-y-4 md:space-y-6">
             <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
                 <h2 className="text-xl md:text-2xl font-semibold mb-4 md:mb-6 text-blue-600 dark:text-sky-400 flex items-center">
-                    <BarChartIcon className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Hasil Simulasi ({SIMULATION_DURATION_MONTHS} Bulan)
+                    <BarChartIcon className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Hasil Simulasi ({simulationDuration} Bulan)
                 </h2>
                 
                 <div className="h-[250px] sm:h-[350px] lg:h-[450px] w-full">

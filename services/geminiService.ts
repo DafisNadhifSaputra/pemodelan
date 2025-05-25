@@ -150,8 +150,8 @@ RINGKASAN MATEMATIS KUNCI UNTUK ANALISIS GRAFIK:
 
 3. HASIL PENELITIAN EMPIRIS:
    - R₀ penelitian = 0.089 (< 1, tidak ada penularan)
-   - Tanpa intervensi: 200 siswa kecanduan dalam 36 bulan
-   - Dengan intervensi: hanya 26 siswa kecanduan dalam 36 bulan
+   - Tanpa intervensi: 200 siswa kecanduan dalam ${durationMonths} bulan
+   - Dengan intervensi: hanya 26 siswa kecanduan dalam ${durationMonths} bulan
    - Populasi awal penelitian: 176 siswa (S₀=72, E₀=77, A₀=18, R₀=9)
 
 4. ASUMSI MODEL DARI PENELITIAN:
@@ -307,7 +307,7 @@ ${baseInfo}
 ### Efektivitas Intervensi dari Grafik
 ${hasIntervention ? 
 '- **θ=1 Impact:** Berapa bulan lebih cepat A(t) turun?\\n- **Recovery Boost:** Laju R(t) meningkat berapa kali lipat?' : 
-'- **Tanpa Intervensi:** A(t) plateau di level berapa?\\n- **Konsekuensi:** Berapa total kecanduan dalam 36 bulan?'}
+'- **Tanpa Intervensi:** A(t) plateau di level berapa?\\n- **Konsekuensi:** Berapa total kecanduan dalam ${durationMonths} bulan?'}
 
 ### Titik Kritis
 - **Peak Time:** Kapan A(t) maksimal dan mengapa di waktu itu?
@@ -510,8 +510,8 @@ RINGKASAN MATEMATIS KUNCI:
    - R₀ < 1: Kecanduan menghilang secara alami
 
 5. HASIL PENELITIAN EMPIRIS:
-   - Tanpa intervensi: Kecanduan mencapai 200 siswa dalam 36 bulan
-   - Dengan intervensi: Kecanduan turun menjadi 26 siswa dalam 36 bulan
+   - Tanpa intervensi: Kecanduan mencapai 200 siswa dalam ${durationMonths} bulan
+   - Dengan intervensi: Kecanduan turun menjadi 26 siswa dalam ${durationMonths} bulan
    - Efektivitas intervensi sangat signifikan dalam mengurangi beban kecanduan
 
 6. TITIK KESEIMBANGAN:
@@ -611,12 +611,12 @@ ${baseInfo}
 ## 1. Hasil Simulasi Model SEAR
 
 ### 1.1 Dinamika Kecanduan A(t)
-- **Nilai Awal vs Akhir:** A(0) = ${initialConditions.A0} → A(36 bulan) = [hasil simulasi]
+- **Nilai Awal vs Akhir:** A(0) = ${initialConditions.A0} → A(${durationMonths} bulan) = [hasil simulasi]
 - **Pola Kurva:** Naik monoton/ada puncak/menurun - dan mengapa?
 - **Alasan Matematis:** Analisis $\\frac{dA}{dt} = \\beta E(t) - (\\gamma + \\theta + \\mu_2)A(t)$ berdasarkan data
 
 ### 1.2 Populasi Susceptible S(t)
-- **Tren:** S(0) = ${initialConditions.S0} → S(36) = ? (perubahan berapa persen?)
+- **Tren:** S(0) = ${initialConditions.S0} → S(${durationMonths}) = ? (perubahan berapa persen?)
 - **Mekanisme:** Balance $\\mu_1 N$ = ${(params.mu1 * nInitial).toFixed(1)} vs $(\\alpha + \\mu_2)S$
 
 ### 1.3 Transisi dan Pemulihan
@@ -675,7 +675,7 @@ ${baseInfo}
 
 ### 1.1 Dinamika Kecanduan A(t)
 **DATA SIMULASI:**
-- A(0) = ${initialConditions.A0} → A(36 bulan) = [nilai dari simulasi]
+- A(0) = ${initialConditions.A0} → A(${durationMonths} bulan) = [nilai dari simulasi]
 - **Pola Kurva:** Apakah naik monoton, ada puncak, atau menurun?
 - **Puncak:** Jika ada, kapan terjadi dan berapa nilai maksimumnya?
 - **Alasan Matematis:** Mengapa $\\frac{dA}{dt} = \\beta E(t) - (\\gamma + \\theta + \\mu_2)A(t)$ menghasilkan pola ini?
@@ -683,21 +683,21 @@ ${baseInfo}
 
 ### 1.2 Populasi Susceptible S(t)
 **TREN NUMERIK:**
-- S(0) = ${initialConditions.S0} → S(36) = ?
+- S(0) = ${initialConditions.S0} → S(${durationMonths}) = ?
 - **Perubahan:** Naik/turun berapa persen selama simulasi?
 - **Mekanisme Matematis:** Balance antara rekrutmen $\\mu_1 N$ = ${(params.mu1 * nInitial).toFixed(1)} vs outflow $(\\alpha + \\mu_2)S$
 - **Alasan Fisik:** Mengapa siswa rentan (S) bertambah/berkurang? Faktor apa dalam lingkungan sekolah yang mempengaruhi kerentanan siswa terhadap game online?
 
 ### 1.3 Transisi Exposed → Addicted
 **ANALISIS E(t):**
-- E(0) = ${initialConditions.E0} → pola E(t) selama 36 bulan
+- E(0) = ${initialConditions.E0} → pola E(t) selama ${durationMonths} bulan
 - **Residence Time:** Berapa lama rata-rata di kompartemen E?
 - **Conversion Rate:** Berapa persen E yang menjadi A?
 - **Alasan Fisik:** Mengapa tidak semua siswa yang terpapar (E) langsung menjadi kecanduan (A)? Faktor psikologis apa yang menentukan transisi E→A pada siswa SMP?
 
 ### 1.4 Pemulihan R(t)
 **RECOVERY DYNAMICS:**
-- R(0) = ${initialConditions.R0} → total recovery di bulan 36
+- R(0) = ${initialConditions.R0} → total recovery di bulan ${durationMonths}
 - **Laju Pemulihan:** ${hasIntervention ? 'Dengan θ=1: $(\\gamma+1)A = ' + (params.gamma + 1).toFixed(3) + 'A$' : 'Tanpa intervensi: $\\gamma A = ' + params.gamma.toFixed(3) + 'A$'}
 - **Alasan Fisik:** ${hasIntervention ? 'Bagaimana konseling, pengawasan orang tua, dan dukungan sosial secara konkret membantu pemulihan siswa dari kecanduan?' : 'Mengapa pemulihan alami sangat lambat tanpa intervensi? Apa hambatan psikologis yang dialami siswa kecanduan?'}
 
@@ -723,9 +723,9 @@ ${baseInfo}
 
 ### 3.2 Perbandingan dengan Penelitian Empiris
 **VALIDASI HASIL:**
-- **Penelitian:** Tanpa intervensi → 200 kecanduan/36 bulan
-- **Penelitian:** Dengan intervensi → 26 kecanduan/36 bulan (87% pengurangan)
-- **SIMULASI ANDA:** Prediksi A(36) = ? (berapa persen pengurangan?)
+- **Penelitian:** Tanpa intervensi → 200 kecanduan/${durationMonths} bulan
+- **Penelitian:** Dengan intervensi → 26 kecanduan/${durationMonths} bulan (87% pengurangan)
+- **SIMULASI ANDA:** Prediksi A(${durationMonths}) = ? (berapa persen pengurangan?)
 
 ## 4. Analisis Parameter vs Penelitian
 

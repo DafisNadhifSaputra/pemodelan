@@ -5,7 +5,7 @@ import { BookOpenIcon, ArrowLeftIcon } from './icons';
 import { runSearSimulation } from '../services/seirSimulator';
 import ThemeToggle from './ThemeToggle';
 import type { SearParams, SimulationDataPoint } from '../types';
-import { DEFAULT_PARAMS, DEFAULT_INITIAL_CONDITIONS, THETA_WITH_INTERVENTION, THETA_WITHOUT_INTERVENTION, SIMULATION_DURATION_MONTHS, TIME_STEP } from '../constants';
+import { DEFAULT_PARAMS, DEFAULT_INITIAL_CONDITIONS, THETA_WITH_INTERVENTION, THETA_WITHOUT_INTERVENTION, DEFAULT_SIMULATION_DURATION_MONTHS, TIME_STEP } from '../constants';
 
 // Lazy load SimulationChart untuk performa yang lebih baik
 import { lazy } from 'react';
@@ -32,20 +32,19 @@ const JournalPage: React.FC<JournalPageProps> = ({ onBack }) => {
   const r0WithoutIntervention = calculateR0(paramsWithoutIntervention);
 
   const N_initial = DEFAULT_INITIAL_CONDITIONS.S0 + DEFAULT_INITIAL_CONDITIONS.E0 + DEFAULT_INITIAL_CONDITIONS.A0 + DEFAULT_INITIAL_CONDITIONS.R0;  useEffect(() => {
-    if (showSimulations) {
-      // Run simulations for comparison
+    if (showSimulations) {      // Run simulations for comparison
       const dataWithIntervention = runSearSimulation(
         paramsWithIntervention, 
         DEFAULT_INITIAL_CONDITIONS, 
         N_initial, 
-        SIMULATION_DURATION_MONTHS, 
+        DEFAULT_SIMULATION_DURATION_MONTHS, 
         TIME_STEP
       );
       const dataWithoutIntervention = runSearSimulation(
         paramsWithoutIntervention, 
         DEFAULT_INITIAL_CONDITIONS, 
         N_initial, 
-        SIMULATION_DURATION_MONTHS, 
+        DEFAULT_SIMULATION_DURATION_MONTHS, 
         TIME_STEP
       );
       

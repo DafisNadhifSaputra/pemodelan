@@ -11,9 +11,11 @@ import { RefreshIcon } from './icons';
 interface ParameterControlsProps {
   params: Omit<SearParams, 'theta'>; 
   initialConditions: InitialConditions;
+  simulationDuration: number;
   hasIntervention: boolean;
   onParamChange: <K extends SearParameterKey,>(paramName: K, value: number) => void;
   onInitialConditionChange: <K extends InitialConditionKey,>(conditionName: K, value: number) => void;
+  onSimulationDurationChange: (duration: number) => void;
   onInterventionChange: (hasIntervention: boolean) => void;
   onReset: () => void;
   N_initial: number;
@@ -101,9 +103,11 @@ const InitialConditionInput: React.FC<{
 const ParameterControls: React.FC<ParameterControlsProps> = ({
   params,
   initialConditions,
+  simulationDuration,
   hasIntervention,
   onParamChange,
   onInitialConditionChange,
+  onSimulationDurationChange,
   onInterventionChange,
   onReset,
   N_initial
@@ -205,6 +209,44 @@ const ParameterControls: React.FC<ParameterControlsProps> = ({
             <p className="text-lg font-semibold text-gray-900 dark:text-white">{N_initial}</p>
         </div>
       </CollapsibleSection>
+      
+      <div>
+        <h3 className="text-lg font-semibold text-blue-600 dark:text-sky-400 mb-3 border-b border-slate-300 dark:border-slate-700 pb-2">Durasi Simulasi</h3>
+        <div className="mb-4">
+          <label htmlFor="simulationDuration" className="flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-sky-300 mb-1.5">
+            Durasi Simulasi (Bulan)
+            <HelpTooltip content="Durasi simulasi dalam bulan. Menentukan berapa lama simulasi akan berjalan.">
+              <span></span>
+            </HelpTooltip>
+          </label>
+          <div className="flex items-center space-x-3">
+            <input
+              type="range"
+              id="simulationDuration-range"
+              name="simulationDuration-range"
+              value={simulationDuration}
+              min={12}
+              max={120}
+              step={1}
+              onChange={(e) => onSimulationDurationChange(parseInt(e.target.value, 10))}
+              className="w-full h-2 bg-slate-300 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer accent-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800 focus:ring-sky-500"
+              aria-label="Durasi simulasi slider"
+            />
+            <input
+              type="number"
+              id="simulationDuration-number"
+              name="simulationDuration-number"
+              value={simulationDuration}
+              min={12}
+              max={120}
+              step={1}
+              onChange={(e) => onSimulationDurationChange(parseInt(e.target.value, 10) || 36)}
+              className="w-24 p-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 text-gray-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm text-right"
+              aria-label="Durasi simulasi nilai"
+            />
+          </div>
+        </div>
+      </div>
       
       <div>
         <h3 className="text-lg font-semibold text-blue-600 dark:text-sky-400 mb-3 border-b border-slate-300 dark:border-slate-700 pb-2">Intervensi (<InlineMath math="\theta" />)</h3>

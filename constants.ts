@@ -24,5 +24,5 @@ export const DEFAULT_INITIAL_CONDITIONS: InitialConditions = {
   R0: 9,   // Jumlah awal Recovered
 };
 
-export const SIMULATION_DURATION_MONTHS = 36; // Durasi simulasi dalam bulan
+export const DEFAULT_SIMULATION_DURATION_MONTHS = 36; // Durasi simulasi default dalam bulan
 export const TIME_STEP = 1; // Langkah waktu simulasi (misalnya 1 untuk per bulan)
