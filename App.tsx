@@ -1,22 +1,36 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy } from 'react';
 
 import { DEFAULT_PARAMS, DEFAULT_INITIAL_CONDITIONS, SIMULATION_DURATION_MONTHS, TIME_STEP, THETA_WITH_INTERVENTION, THETA_WITHOUT_INTERVENTION } from './constants';
-import type { SeirParams, InitialConditions, SimulationDataPoint, SeirParameterKey, InitialConditionKey, AiInterpretationResponse } from './types';
-import { runSeirSimulation } from './services/seirSimulator';
-import { getAiInterpretation } from './services/geminiService';
+import type { SearParams, InitialConditions, SimulationDataPoint, SearParameterKey, InitialConditionKey, AiInterpretationResponse } from './types';
+import { runSearSimulation } from './services/seirSimulator';
+import { getAiInterpretation, getAiChartAnalysis } from './services/geminiService';
 import ParameterControls from './components/ParameterControls';
+import PresetConfigurations from './components/PresetConfigurations';
+import type { Preset } from './components/PresetConfigurations';
+import SearModelInfo from './components/SeirModelInfo';
+import ThemeToggle from './components/ThemeToggle';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { LoadingProvider } from './contexts/LoadingContext';
+import { InfoIcon, BarChartIcon, SettingsIcon, BookOpenIcon, SparklesIcon } from './components/icons';
+import LazyLoadWrapper from './components/LazyLoadWrapper';
+import { ModalSkeleton } from './components/Skeleton';
+import LoadingProgressBar from './components/LoadingProgressBar';
+
+// Lazy loaded components untuk optimasi performa
+const StatisticsCards = lazy(() => import('./components/StatisticsCards'));
+const AiInterpretationSection = lazy(() => import('./components/AiInterpretationSection'));
+const PaperModal = lazy(() => import('./components/PaperModal'));
+const AiChatModal = lazy(() => import('./components/AiChatModal'));
+const JournalPage = lazy(() => import('./components/JournalPage'));
+
+// Import SimulationChart directly to avoid lazy loading issues
 import SimulationChart from './components/SimulationChart';
-import SeirModelInfo from './components/SeirModelInfo';
-import PaperModal from './components/PaperModal';
-import AiInterpretationSection from './components/AiInterpretationSection';
-import AiChatModal from './components/AiChatModal';
-import { InfoIcon, UsersIcon, EyeIcon, ZapIcon, ShieldCheckIcon, BarChartIcon, SettingsIcon, BookOpenIcon, SparklesIcon } from './components/icons';
-import { paperTitle, paperFullText } from './paperContent';
 
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const [currentView, setCurrentView] = useState<'simulation' | 'journal'>('simulation');
   const [hasIntervention, setHasIntervention] = useState<boolean>(true);
-  const [params, setParams] = useState<SeirParams>({
+  const [params, setParams] = useState<SearParams>({
     ...DEFAULT_PARAMS,
     theta: hasIntervention ? THETA_WITH_INTERVENTION : THETA_WITHOUT_INTERVENTION,
   });
@@ -30,9 +44,9 @@ const App: React.FC = () => {
   const [isGeneratingInterpretation, setIsGeneratingInterpretation] = useState<boolean>(false);
   const [interpretationError, setInterpretationError] = useState<string | null>(null);
 
-  const N_initial = initialConditions.S0 + initialConditions.E0 + initialConditions.I0 + initialConditions.R0;
+  const N_initial = initialConditions.S0 + initialConditions.E0 + initialConditions.A0 + initialConditions.R0;
 
-  const calculateR0 = useCallback((currentParams: SeirParams): number => {
+  const calculateR0 = useCallback((currentParams: SearParams): number => {
     // Theta is already part of currentParams when this is called
     if ((currentParams.gamma + currentParams.theta + currentParams.mu2) === 0) return Infinity;
     return currentParams.beta / (currentParams.gamma + currentParams.theta + currentParams.mu2);
@@ -49,9 +63,9 @@ const App: React.FC = () => {
   }, [hasIntervention]);
 
   useEffect(() => {
-    const N_val = initialConditions.S0 + initialConditions.E0 + initialConditions.I0 + initialConditions.R0;
+    const N_val = initialConditions.S0 + initialConditions.E0 + initialConditions.A0 + initialConditions.R0;
     if (N_val <= 0) {
-      setSimulationData([{ time: 0, S: initialConditions.S0, E: initialConditions.E0, I: initialConditions.I0, R: initialConditions.R0 }]);
+      setSimulationData([{ time: 0, S: initialConditions.S0, E: initialConditions.E0, A: initialConditions.A0, R: initialConditions.R0 }]);
       setCurrentR0(0);
       setAiInterpretation(null);
       // Clear AI-specific error, let chart show its message
@@ -61,7 +75,7 @@ const App: React.FC = () => {
     // Clear previous errors if simulation is runnable
     setInterpretationError(null); 
 
-    const data = runSeirSimulation(
+    const data = runSearSimulation(
       params,
       initialConditions,
       N_val,
@@ -73,12 +87,13 @@ const App: React.FC = () => {
   }, [params, initialConditions, calculateR0]);
 
   const fetchAndSetAiInterpretation = async (
-    currentParams: SeirParams,
+    currentParams: SearParams,
     currentInitialConditions: InitialConditions,
     currentSimData: SimulationDataPoint[],
     r0: number,
     nInitial: number,
-    interventionStatus: boolean
+    interventionStatus: boolean,
+    responseLength: 'singkat' | 'sedang' | 'panjang' = 'sedang'
   ) => {
     // The API key check is now robustly handled in getAiInterpretation service.
     // This function now focuses on managing state for the API call.
@@ -93,7 +108,9 @@ const App: React.FC = () => {
         r0,
         nInitial,
         interventionStatus,
-        SIMULATION_DURATION_MONTHS
+        SIMULATION_DURATION_MONTHS,
+        undefined,
+        responseLength
       );
       if (interpretationResult.success && interpretationResult.interpretation) {
         setAiInterpretation(interpretationResult.interpretation);
@@ -105,6 +122,48 @@ const App: React.FC = () => {
       console.error("Error fetching AI interpretation:", error);
       setAiInterpretation(null);
       let errorMessage = "Terjadi kesalahan saat mengambil interpretasi AI.";
+      if (error instanceof Error) {
+          errorMessage += ` Detail: ${error.message}`;
+      }
+      setInterpretationError(errorMessage);
+    } finally {
+      setIsGeneratingInterpretation(false);
+    }
+  };
+
+  const fetchAndSetAiChartAnalysis = async (
+    currentParams: SearParams,
+    currentInitialConditions: InitialConditions,
+    currentSimData: SimulationDataPoint[],
+    r0: number,
+    nInitial: number,
+    interventionStatus: boolean
+  ) => {
+    // Function for AI chart analysis with vision capabilities
+    setIsGeneratingInterpretation(true);
+    setInterpretationError(null);
+    setAiInterpretation(null);
+    try {
+      const interpretationResult: AiInterpretationResponse = await getAiChartAnalysis(
+        currentParams,
+        currentInitialConditions,
+        currentSimData,
+        r0,
+        nInitial,
+        interventionStatus,
+        SIMULATION_DURATION_MONTHS,
+        'simulation-chart' // Chart element ID
+      );
+      if (interpretationResult.success && interpretationResult.interpretation) {
+        setAiInterpretation(interpretationResult.interpretation);
+      } else {
+        setAiInterpretation(null);
+        setInterpretationError(interpretationResult.error || "Gagal mendapatkan analisis grafik dari AI.");
+      }
+    } catch (error) {
+      console.error("Error fetching AI chart analysis:", error);
+      setAiInterpretation(null);
+      let errorMessage = "Terjadi kesalahan saat mengambil analisis grafik AI.";
       if (error instanceof Error) {
           errorMessage += ` Detail: ${error.message}`;
       }
@@ -133,7 +192,7 @@ const App: React.FC = () => {
   // }, [simulationData, params, initialConditions, currentR0, N_initial, hasIntervention, debouncedFetchInterpretation]);
 
 
-  const handleParamChange = <K extends SeirParameterKey,>(paramName: K, value: number) => {
+  const handleParamChange = <K extends SearParameterKey,>(paramName: K, value: number) => {
     setParams(prevParams => ({ ...prevParams, [paramName]: value }));
   };
 
@@ -141,33 +200,78 @@ const App: React.FC = () => {
     setInitialConditions(prevConditions => ({ ...prevConditions, [conditionName]: value }));
   };
 
+  const handlePresetSelect = (preset: Preset) => {
+    const fullParams: SearParams = {
+      ...preset.params,
+      theta: preset.hasIntervention ? THETA_WITH_INTERVENTION : THETA_WITHOUT_INTERVENTION
+    };
+    setParams(fullParams);
+    setInitialConditions(preset.initialConditions);
+    setHasIntervention(preset.hasIntervention);
+    // Clear previous AI interpretation when changing presets
+    setAiInterpretation(null);
+    setInterpretationError(null);
+  };
+
+  // Handle view switching
+  if (currentView === 'journal') {
+    return (
+      <LazyLoadWrapper fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4 animate-pulse">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
+            <p className="text-slate-600 dark:text-slate-400">Memuat halaman jurnal...</p>
+          </div>
+        </div>
+      }>
+        <JournalPage onBack={() => setCurrentView('simulation')} />
+      </LazyLoadWrapper>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-700 text-gray-100 p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-700 text-gray-900 dark:text-gray-100 p-4 md:p-8 font-sans">
+      <LoadingProgressBar />
       <header className="mb-8">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-2">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300 text-center sm:text-left">
-            Model SEIR: Kecanduan Game Online
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-600 dark:from-sky-400 to-cyan-600 dark:to-cyan-300 text-center sm:text-left">
+            Model SEAR: Kecanduan Game Online
             </h1>
-            <button
-                onClick={() => setIsPaperModalOpen(true)}
-                className="mt-4 sm:mt-0 bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center"
-                aria-label="Baca Jurnal Lengkap"
-            >
-                <BookOpenIcon className="w-5 h-5 mr-2" />
-                Baca Jurnal Lengkap
-            </button>
+            <div className="flex items-center space-x-3 mt-4 sm:mt-0">
+              <ThemeToggle />
+              <button
+                  onClick={() => setCurrentView('journal')}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center"
+                  aria-label="Baca Jurnal Lengkap"
+              >
+                  <BookOpenIcon className="w-5 h-5 mr-2" />
+                  Jurnal Penelitian
+              </button>
+              <button
+                  onClick={() => setIsPaperModalOpen(true)}
+                  className="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center"
+                  aria-label="Baca Paper Asli"
+              >
+                  <BookOpenIcon className="w-5 h-5 mr-2" />
+                  Paper Asli
+              </button>
+            </div>
         </div>
-        <p className="text-slate-300 mt-1 text-md md:text-lg text-center sm:text-left">
-          Simulasi interaktif berdasarkan penelitian Syafruddin Side dkk. (2020)
+        <p className="text-slate-600 dark:text-slate-300 mt-1 text-md md:text-lg text-center sm:text-left">
+          Simulasi interaktif Model SEAR (Susceptible-Exposed-Addicted-Recovered) untuk analisis kecanduan game online
+        </p>
+        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm text-center sm:text-left">
+          Dikembangkan oleh Tim Matematika UNESA: Dafis N.S., Nabila A.P., Helmaylia D.P., Mayla Y.M.
         </p>
       </header>
 
       <div className="container mx-auto grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
         <div className="xl:col-span-1 space-y-4 md:space-y-6">
-          <div className="bg-slate-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
-            <h2 className="text-xl md:text-2xl font-semibold mb-4 text-sky-400 flex items-center">
+          <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
+            <h2 className="text-xl md:text-2xl font-semibold mb-4 text-blue-600 dark:text-sky-400 flex items-center">
               <SettingsIcon className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Konfigurasi Model
             </h2>
+            <PresetConfigurations onPresetSelect={handlePresetSelect} />
             <ParameterControls
               params={params}
               initialConditions={initialConditions}
@@ -178,19 +282,20 @@ const App: React.FC = () => {
               N_initial={N_initial}
             />
           </div>
-           <div className="bg-slate-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
-            <h2 className="text-xl md:text-2xl font-semibold mb-4 text-sky-400 flex items-center">
+           <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
+            <h2 className="text-xl md:text-2xl font-semibold mb-4 text-blue-600 dark:text-sky-400 flex items-center">
               <InfoIcon className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Wawasan Model
             </h2>
-            <SeirModelInfo currentR0={currentR0} />
+            <SearModelInfo currentR0={currentR0} />
           </div>
         </div>
 
         <div className="xl:col-span-2 space-y-4 md:space-y-6">
-            <div className="bg-slate-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
-                <h2 className="text-xl md:text-2xl font-semibold mb-4 md:mb-6 text-sky-400 flex items-center">
+            <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
+                <h2 className="text-xl md:text-2xl font-semibold mb-4 md:mb-6 text-blue-600 dark:text-sky-400 flex items-center">
                     <BarChartIcon className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Hasil Simulasi ({SIMULATION_DURATION_MONTHS} Bulan)
                 </h2>
+                
                 <div className="h-[250px] sm:h-[350px] lg:h-[450px] w-full">
                     <SimulationChart 
                         data={simulationData} 
@@ -198,149 +303,111 @@ const App: React.FC = () => {
                         showPaperReference={true}
                     />
                 </div>
-                 { N_initial > 0 && simulationData.length > 0 && simulationData[0].S === initialConditions.S0 && /* Check if actual simulation data is present */
-                    <div className="mt-6 space-y-4">
-                        {/* Total Population Summary */}
-                        <div className="bg-slate-700/50 p-4 rounded-lg border border-slate-600">
-                            <h3 className="text-lg font-semibold text-sky-400 mb-2">Ringkasan Populasi</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                                <div>
-                                    <div className="text-sm text-slate-400">Populasi Awal</div>
-                                    <div className="text-lg font-bold text-white">{N_initial}</div>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-slate-400">Populasi Akhir</div>
-                                    <div className="text-lg font-bold text-white">
-                                        {simulationData.length > 0 ? Math.round(
-                                            (simulationData[simulationData.length - 1]?.S || 0) + 
-                                            (simulationData[simulationData.length - 1]?.E || 0) + 
-                                            (simulationData[simulationData.length - 1]?.I || 0) + 
-                                            (simulationData[simulationData.length - 1]?.R || 0)
-                                        ) : 'N/A'}
+                
+                {/* Statistics Cards */}
+                {N_initial > 0 && simulationData.length > 0 && (
+                    <div className="mt-6">
+                        <LazyLoadWrapper fallback={
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {[...Array(4)].map((_, i) => (
+                                    <div key={i} className="bg-slate-100 dark:bg-slate-700 p-4 rounded-lg animate-pulse">
+                                        <div className="h-4 bg-slate-200 dark:bg-slate-600 rounded mb-2"></div>
+                                        <div className="h-6 bg-slate-200 dark:bg-slate-600 rounded"></div>
                                     </div>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-slate-400">R₀ (Reproduksi)</div>
-                                    <div className={`text-lg font-bold ${currentR0 < 1 ? 'text-green-400' : 'text-red-400'}`}>
-                                        {currentR0.toFixed(3)}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-slate-400">Status Intervensi</div>
-                                    <div className={`text-lg font-bold ${hasIntervention ? 'text-green-400' : 'text-orange-400'}`}>
-                                        {hasIntervention ? 'Aktif' : 'Tidak Aktif'}
-                                    </div>
-                                </div>
+                                ))}
                             </div>
-                        </div>
-
-                        {/* Individual Compartment Statistics */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                            {[
-                            { 
-                                label: 'Susceptible (S)', 
-                                value: simulationData[simulationData.length - 1]?.S, 
-                                initial: initialConditions.S0,
-                                Icon: UsersIcon, 
-                                color: 'text-blue-400',
-                                bgColor: 'bg-blue-500/10',
-                                description: 'Berpotensi Kecanduan'
-                            },
-                            { 
-                                label: 'Exposed (E)', 
-                                value: simulationData[simulationData.length - 1]?.E, 
-                                initial: initialConditions.E0,
-                                Icon: EyeIcon, 
-                                color: 'text-yellow-400',
-                                bgColor: 'bg-yellow-500/10',
-                                description: 'Mencoba Bermain'
-                            },
-                            { 
-                                label: 'Infected (I)', 
-                                value: simulationData[simulationData.length - 1]?.I, 
-                                initial: initialConditions.I0,
-                                Icon: ZapIcon, 
-                                color: 'text-red-400',
-                                bgColor: 'bg-red-500/10',
-                                description: 'Kecanduan'
-                            },
-                            { 
-                                label: 'Recovered (R)', 
-                                value: simulationData[simulationData.length - 1]?.R, 
-                                initial: initialConditions.R0,
-                                Icon: ShieldCheckIcon, 
-                                color: 'text-green-400',
-                                bgColor: 'bg-green-500/10',
-                                description: 'Berhenti Bermain'
-                            },
-                            ].map(({ label, value, initial, Icon, color, bgColor, description }) => {
-                                const currentValue = value !== undefined ? value : 0;
-                                const change = currentValue - initial;
-                                const finalTotal = simulationData.length > 0 ? 
-                                    (simulationData[simulationData.length - 1]?.S || 0) + 
-                                    (simulationData[simulationData.length - 1]?.E || 0) + 
-                                    (simulationData[simulationData.length - 1]?.I || 0) + 
-                                    (simulationData[simulationData.length - 1]?.R || 0) : N_initial;
-                                const percentage = finalTotal > 0 ? (currentValue / finalTotal * 100) : 0;
-                                
-                                return (
-                                    <div key={label} className={`${bgColor} border border-slate-600 p-3 md:p-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 card-hover`}>
-                                        <Icon className={`w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 ${color}`} />
-                                        <div className={`text-xs md:text-sm font-medium ${color} mb-1`}>{label}</div>
-                                        <div className="text-lg md:text-xl font-bold text-white">{Math.round(currentValue)}</div>
-                                        <div className="text-xs text-slate-400 mt-1">{description}</div>
-                                        <div className="text-xs text-slate-300 mt-1">
-                                            {percentage.toFixed(1)}% dari total
-                                        </div>
-                                        <div className={`text-xs mt-1 ${change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                            {change >= 0 ? '+' : ''}{Math.round(change)} 
-                                            <span className="text-slate-400"> dari awal</span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                        }>
+                            <StatisticsCards
+                                simulationData={simulationData}
+                                hasIntervention={hasIntervention}
+                                currentR0={currentR0}
+                                N_initial={N_initial}
+                                params={params}
+                                initialConditions={initialConditions}
+                            />
+                        </LazyLoadWrapper>
                     </div>
-                 }
+                )}
             </div>
-            <div className="bg-slate-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
-                <h2 className="text-xl md:text-2xl font-semibold mb-4 text-sky-400 flex items-center">
+            <div className="bg-slate-800 dark:bg-gray-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
+                <h2 className="text-xl md:text-2xl font-semibold mb-4 text-sky-400 dark:text-sky-300 flex items-center">
                     <SparklesIcon className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Analisis AI (Gemini)
                 </h2>
-                <AiInterpretationSection
-                    interpretation={aiInterpretation}
-                    isLoading={isGeneratingInterpretation}
-                    error={interpretationError}
-                    onRefresh={() => fetchAndSetAiInterpretation(params, initialConditions, simulationData, currentR0, N_initial, hasIntervention)}
-                    onOpenChat={() => setIsAiChatOpen(true)}
-                />
+                <LazyLoadWrapper fallback={
+                    <div className="space-y-4 animate-pulse">
+                        <div className="h-4 bg-slate-700 rounded w-3/4"></div>
+                        <div className="h-4 bg-slate-700 rounded w-1/2"></div>
+                        <div className="h-20 bg-slate-700 rounded"></div>
+                        <div className="flex space-x-2">
+                            <div className="h-8 bg-slate-700 rounded w-20"></div>
+                            <div className="h-8 bg-slate-700 rounded w-20"></div>
+                        </div>
+                    </div>
+                }>
+                    <AiInterpretationSection
+                        interpretation={aiInterpretation}
+                        isLoading={isGeneratingInterpretation}
+                        error={interpretationError}
+                        onRefresh={(responseLength = 'sedang') => fetchAndSetAiInterpretation(params, initialConditions, simulationData, currentR0, N_initial, hasIntervention, responseLength)}
+                        onRefreshWithChart={() => fetchAndSetAiChartAnalysis(params, initialConditions, simulationData, currentR0, N_initial, hasIntervention)}
+                        onOpenChat={() => setIsAiChatOpen(true)}
+                    />
+                </LazyLoadWrapper>
             </div>
         </div>
       </div>
-       <footer className="text-center mt-12 py-4 text-slate-400 border-t border-slate-700">
-        <p>&copy; {new Date().getFullYear()} Simulasi Model SEIR. Hak Cipta Dilindungi.</p>
-        <p className="text-sm">Terinspirasi dari karya Syafruddin Side, Nurul Azizah Muzakir, Dian Pebriani, Syana Nurul Utari (2020).</p>
-      </footer>
-      
-      <PaperModal
-        isOpen={isPaperModalOpen}
-        onClose={() => setIsPaperModalOpen(false)}
-        title={paperTitle}
-        content={paperFullText}
-      />
+       <footer className="text-center mt-12 py-6 text-slate-400 dark:text-gray-400 border-t border-slate-700 dark:border-gray-600">
+        <div className="space-y-3">
+          <p>&copy; {new Date().getFullYear()} Simulasi Model SEAR - Kecanduan Game Online. Hak Cipta Dilindungi.</p>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-slate-500 dark:text-gray-300">Dikembangkan oleh:</p>
+            <div className="text-sm space-y-1">
+              <p><strong>Dafis Nadhif Saputra</strong> • <strong>Nabila Agatha Parsa</strong></p>
+              <p><strong>Helmaylia Deshynta Putri</strong> • <strong>Mayla Yaasmiin Mumtaazah</strong></p>
+              <p className="text-xs text-slate-500 dark:text-gray-400 mt-2">Mahasiswa S1 Matematika, Universitas Negeri Surabaya</p>
+            </div>
+          </div>
+          <p className="text-xs border-t border-slate-600 dark:border-gray-600 pt-3 mt-4">
+            Terinspirasi dari penelitian: Syafruddin Side, Nurul Azizah Muzakir, Dian Pebriani, Syana Nurul Utari (2020)
+          </p>
+        </div>
+      </footer>        {isPaperModalOpen && (
+          <LazyLoadWrapper fallback={<ModalSkeleton />}>
+            <PaperModal
+              isOpen={isPaperModalOpen}
+              onClose={() => setIsPaperModalOpen(false)}
+              title="Model SEIR Kecanduan Game Online pada Siswa di SMP Negeri 3 Makassar"
+            />
+          </LazyLoadWrapper>
+        )}
 
-      <AiChatModal
-        isOpen={isAiChatOpen}
-        onClose={() => setIsAiChatOpen(false)}
-        params={params}
-        initialConditions={initialConditions}
-        simulationData={simulationData}
-        currentR0={currentR0}
-        nInitial={N_initial}
-        hasIntervention={hasIntervention}
-      />
+        {isAiChatOpen && (
+          <LazyLoadWrapper fallback={<ModalSkeleton />}>
+            <AiChatModal
+              isOpen={isAiChatOpen}
+              onClose={() => setIsAiChatOpen(false)}
+              params={params}
+              initialConditions={initialConditions}
+              simulationData={simulationData}
+              currentR0={currentR0}
+              nInitial={N_initial}
+              hasIntervention={hasIntervention}
+            />
+          </LazyLoadWrapper>
+        )}
     </div>
   );
 };
 
+const App: React.FC = () => {
+  return (
+    <ThemeProvider>
+      <LoadingProvider>
+        <AppContent />
+      </LoadingProvider>
+    </ThemeProvider>
+  );
+};
+
 export default App;
+export { App };

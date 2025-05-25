@@ -1,34 +1,24 @@
-import React, { useRef, useState } from 'react';
-import { CloseIcon, DownloadIcon, PrintIcon, ZoomInIcon, ZoomOutIcon } from './icons';
+import React from 'react';
+import { CloseIcon, DownloadIcon, ExternalLinkIcon } from './icons';
 
 interface PaperModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  content: string; 
 }
 
-const PaperModal: React.FC<PaperModalProps> = ({ isOpen, onClose, title, content }) => {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(100);
-
-  const handleZoomIn = () => setZoom(prev => Math.min(prev + 25, 200));
-  const handleZoomOut = () => setZoom(prev => Math.max(prev - 25, 50));
-
+const PaperModal: React.FC<PaperModalProps> = ({ isOpen, onClose, title }) => {
   const handleDownload = () => {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'seir-model-paper.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const link = document.createElement('a');
+    link.href = '/pjurnal.pdf';
+    link.download = 'Model_SEAR_Kecanduan_Game_Online.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handleOpenInNewTab = () => {
+    window.open('/pjurnal.pdf', '_blank');
   };
 
   if (!isOpen) return null;
@@ -41,37 +31,43 @@ const PaperModal: React.FC<PaperModalProps> = ({ isOpen, onClose, title, content
       role="dialog"
     >
       <div 
-        className="bg-slate-800 text-slate-200 rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] md:max-h-[90vh] flex flex-col modal-content"
+        className="bg-slate-800 dark:bg-gray-900 text-slate-200 dark:text-gray-100 rounded-xl shadow-2xl w-full h-full max-w-[95vw] max-h-[98vh] flex flex-col modal-content"
         onClick={(e) => e.stopPropagation()} 
       >
-        <header className="flex items-center justify-between p-3 md:p-4 border-b border-slate-700">
-          <h2 className="text-lg md:text-xl font-semibold text-sky-400 truncate">{title}</h2>
+        <header className="flex items-center justify-between p-3 md:p-4 border-b border-slate-700 dark:border-gray-600">
+          <h2 className="text-lg md:text-xl font-semibold text-sky-400 dark:text-sky-300 truncate">{title}</h2>
           <div className="flex items-center space-x-1 md:space-x-2">
-            <button onClick={handleZoomOut} className="p-2 text-slate-400 hover:text-sky-400">
-              <ZoomOutIcon className="w-4 h-4" />
+            <button 
+              onClick={handleOpenInNewTab} 
+              className="p-2 text-slate-400 dark:text-gray-400 hover:text-sky-400 dark:hover:text-sky-300"
+              title="Buka di tab baru"
+            >
+              <ExternalLinkIcon className="w-4 h-4" />
             </button>
-            <span className="text-xs text-slate-400">{zoom}%</span>
-            <button onClick={handleZoomIn} className="p-2 text-slate-400 hover:text-sky-400">
-              <ZoomInIcon className="w-4 h-4" />
-            </button>
-            <button onClick={handleDownload} className="p-2 text-slate-400 hover:text-sky-400">
+            <button 
+              onClick={handleDownload} 
+              className="p-2 text-slate-400 dark:text-gray-400 hover:text-sky-400 dark:hover:text-sky-300"
+              title="Download PDF"
+            >
               <DownloadIcon className="w-4 h-4" />
             </button>
-            <button onClick={handlePrint} className="p-2 text-slate-400 hover:text-sky-400">
-              <PrintIcon className="w-4 h-4" />
-            </button>
-            <button onClick={onClose} className="p-2 text-slate-400 hover:text-red-400">
+            <button 
+              onClick={onClose} 
+              className="p-2 text-slate-400 dark:text-gray-400 hover:text-red-400 dark:hover:text-red-300"
+              title="Tutup"
+            >
               <CloseIcon className="w-4 h-4" />
             </button>
           </div>
         </header>
         
-        <div 
-          ref={contentRef}
-          className="flex-1 p-6 overflow-y-auto bg-white text-gray-900"
-          style={{ fontSize: zoom + '%' }}
-          dangerouslySetInnerHTML={{ __html: content }} 
-        />
+        <div className="flex-1 bg-gray-100 dark:bg-gray-200 min-h-[90vh]">
+          <iframe
+            src="/pjurnal.pdf"
+            className="w-full h-full border-none min-h-[90vh]"
+            title="Jurnal Penelitian - Model SEAR Kecanduan Game Online"
+          />
+        </div>
       </div>
     </div>
   );

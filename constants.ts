@@ -20,7 +20,7 @@ export const THETA_WITHOUT_INTERVENTION = 0; // Diasumsikan untuk skenario "tanp
 export const DEFAULT_INITIAL_CONDITIONS: InitialConditions = {
   S0: 72,  // Jumlah awal Susceptible
   E0: 77,  // Jumlah awal Exposed
-  I0: 18,  // Jumlah awal Infected
+  A0: 18,  // Jumlah awal Addicted (dulunya I0)
   R0: 9,   // Jumlah awal Recovered
 };
 

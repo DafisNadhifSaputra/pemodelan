@@ -1,13 +1,15 @@
 
-import React from 'react';
-import { RefreshIcon, ChatIcon } from './icons';
+import React, { useState } from 'react';
+import { RefreshIcon, ChatIcon, EyeIcon } from './icons';
 import LoadingSpinner from './LoadingSpinner';
+import MarkdownRenderer from './MarkdownRenderer';
 
 interface AiInterpretationSectionProps {
   interpretation: string | null;
   isLoading: boolean;
   error: string | null;
-  onRefresh: () => void;
+  onRefresh: (responseLength?: 'singkat' | 'sedang' | 'panjang') => void;
+  onRefreshWithChart: () => void;
   onOpenChat: () => void;
 }
 
@@ -16,8 +18,11 @@ const AiInterpretationSection: React.FC<AiInterpretationSectionProps> = ({
   isLoading,
   error,
   onRefresh,
+  onRefreshWithChart,
   onOpenChat
 }) => {
+  const [responseLength, setResponseLength] = useState<'singkat' | 'sedang' | 'panjang'>('sedang');
+
   // API key is now hardcoded in geminiService.ts, so apiKeyAvailable check is no longer needed here.
 
   return (
@@ -34,7 +39,7 @@ const AiInterpretationSection: React.FC<AiInterpretationSectionProps> = ({
           <p className="font-semibold">Gagal Memuat Analisis AI</p>
           <p className="text-sm">{error}</p>
           <button
-              onClick={onRefresh}
+              onClick={() => onRefresh(responseLength)}
               className="mt-2 bg-slate-600 hover:bg-slate-500 text-white font-medium py-1.5 px-3 rounded-md text-sm flex items-center"
               aria-label="Coba lagi memuat analisis AI"
           >
@@ -47,14 +52,35 @@ const AiInterpretationSection: React.FC<AiInterpretationSectionProps> = ({
       {!isLoading && !error && !interpretation && (
          <div className="p-4 bg-slate-700/50 rounded-lg text-center">
             <p className="text-slate-400 mb-4">Analisis AI belum dimuat. Klik tombol di bawah untuk memulai analisis atau chat interaktif.</p>
+            {/* Response Length Selector */}
+            <div className="mb-4 flex items-center justify-center space-x-2">
+              <label className="text-sm text-slate-400">Panjang Respons:</label>
+              <select
+                value={responseLength}
+                onChange={(e) => setResponseLength(e.target.value as 'singkat' | 'sedang' | 'panjang')}
+                className="bg-slate-600 border border-slate-500 text-slate-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+              >
+                <option value="singkat">Singkat (Ringkas)</option>
+                <option value="sedang">Sedang (Standar)</option>
+                <option value="panjang">Panjang (Detail)</option>
+              </select>
+            </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
-                  onClick={onRefresh}
+                  onClick={() => onRefresh(responseLength)}
                   className="bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-4 rounded-md text-sm flex items-center justify-center"
                   aria-label="Dapatkan Analisis AI sekarang"
               >
                   <RefreshIcon className="w-4 h-4 mr-2" />
-                  Dapatkan Analisis AI
+                  Analisis Teks
+              </button>
+              <button
+                  onClick={onRefreshWithChart}
+                  className="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md text-sm flex items-center justify-center"
+                  aria-label="Dapatkan Analisis AI dengan Grafik"
+              >
+                  <EyeIcon className="w-4 h-4 mr-2" />
+                  Analisis + Grafik
               </button>
               <button
                   onClick={onOpenChat}
@@ -70,17 +96,38 @@ const AiInterpretationSection: React.FC<AiInterpretationSectionProps> = ({
 
       {!isLoading && !error && interpretation && (
         <div className="space-y-4">
-          <div className="p-4 bg-slate-700/50 rounded-lg prose prose-sm prose-invert max-w-none">
-            <div style={{ whiteSpace: 'pre-wrap' }} dangerouslySetInnerHTML={{ __html: interpretation.replace(/\n/g, '<br />') }} />
+          <div className="p-4 bg-slate-700/50 rounded-lg">
+            <MarkdownRenderer content={interpretation} />
+          </div>
+          {/* Response Length Selector */}
+          <div className="flex items-center space-x-2 mb-3">
+            <label className="text-sm text-slate-400">Panjang Respons:</label>
+            <select
+              value={responseLength}
+              onChange={(e) => setResponseLength(e.target.value as 'singkat' | 'sedang' | 'panjang')}
+              className="bg-slate-600 border border-slate-500 text-slate-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+            >
+              <option value="singkat">Singkat (Ringkas)</option>
+              <option value="sedang">Sedang (Standar)</option>
+              <option value="panjang">Panjang (Detail)</option>
+            </select>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <button
-                onClick={onRefresh}
+                onClick={() => onRefresh(responseLength)}
                 className="bg-slate-600 hover:bg-slate-500 text-white font-medium py-2 px-4 rounded-md text-sm flex items-center justify-center"
                 aria-label="Refresh Analisis AI"
             >
                 <RefreshIcon className="w-4 h-4 mr-2" />
                 Perbarui Analisis
+            </button>
+            <button
+                onClick={onRefreshWithChart}
+                className="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md text-sm flex items-center justify-center"
+                aria-label="Analisis dengan Grafik"
+            >
+                <EyeIcon className="w-4 h-4 mr-2" />
+                Analisis + Grafik
             </button>
             <button
                 onClick={onOpenChat}
