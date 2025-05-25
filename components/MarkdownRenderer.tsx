@@ -7,7 +7,8 @@ interface MarkdownRendererProps {
   className?: string;
 }
 
-const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className = "" }) => {  // Function to process markdown and LaTeX
+const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className = "" }) => {
+  // Function to process markdown and LaTeX
   const processContent = (text: string): React.ReactElement => {
     // Split content by lines
     const lines = text.split('\n');
@@ -19,7 +20,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
         const paragraphText = currentParagraph.join(' ').trim();
         if (paragraphText) {
           elements.push(
-            <p key={elements.length} className="mb-3 text-slate-300 leading-relaxed">
+            <p key={elements.length} className="mb-3 text-slate-700 dark:text-slate-300 leading-relaxed">
               {processInlineContent(paragraphText)}
             </p>
           );
@@ -35,11 +36,13 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
       if (!trimmedLine) {
         flushParagraph();
         return;
-      }      // Headers
+      }
+      
+      // Headers
       if (trimmedLine.startsWith('#### ')) {
         flushParagraph();
         elements.push(
-          <h5 key={elements.length} className="text-base font-semibold text-sky-100 mt-4 mb-2">
+          <h5 key={elements.length} className="text-base font-semibold text-blue-600 dark:text-sky-100 mt-4 mb-2">
             {processInlineContent(trimmedLine.slice(5))}
           </h5>
         );
@@ -49,7 +52,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
       if (trimmedLine.startsWith('### ')) {
         flushParagraph();
         elements.push(
-          <h4 key={elements.length} className="text-lg font-semibold text-sky-200 mt-5 mb-2">
+          <h4 key={elements.length} className="text-lg font-semibold text-blue-600 dark:text-sky-200 mt-5 mb-2">
             {processInlineContent(trimmedLine.slice(4))}
           </h4>
         );
@@ -59,7 +62,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
       if (trimmedLine.startsWith('## ')) {
         flushParagraph();
         elements.push(
-          <h3 key={elements.length} className="text-xl font-semibold text-sky-300 mt-6 mb-3 border-b border-slate-600 pb-2">
+          <h3 key={elements.length} className="text-xl font-semibold text-blue-700 dark:text-sky-300 mt-6 mb-3 border-b border-slate-300 dark:border-slate-600 pb-2">
             {processInlineContent(trimmedLine.slice(3))}
           </h3>
         );
@@ -69,18 +72,20 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
       if (trimmedLine.startsWith('# ')) {
         flushParagraph();
         elements.push(
-          <h2 key={elements.length} className="text-2xl font-bold text-sky-400 mt-8 mb-4">
+          <h2 key={elements.length} className="text-2xl font-bold text-blue-700 dark:text-sky-400 mt-8 mb-4">
             {processInlineContent(trimmedLine.slice(2))}
           </h2>
         );
         return;
-      }      // Code blocks
+      }
+      
+      // Code blocks
       if (trimmedLine.startsWith('```')) {
         flushParagraph();
         // This is a simple implementation - for full support, you'd need to handle multi-line code blocks
         elements.push(
-          <div key={elements.length} className="my-4 p-3 bg-slate-800 rounded-md border border-slate-600">
-            <code className="text-sky-200 text-sm font-mono">
+          <div key={elements.length} className="my-4 p-3 bg-slate-100 dark:bg-slate-800 rounded-md border border-slate-300 dark:border-slate-600">
+            <code className="text-blue-700 dark:text-sky-200 text-sm font-mono">
               {trimmedLine.slice(3)}
             </code>
           </div>
@@ -91,9 +96,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
       // Inline code with backticks
       if (trimmedLine.includes('`') && !trimmedLine.startsWith('`')) {
         flushParagraph();
-        const processedLine = trimmedLine.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 bg-slate-700 text-sky-200 rounded text-sm font-mono">$1</code>');
+        const processedLine = trimmedLine.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 bg-slate-200 dark:bg-slate-700 text-blue-700 dark:text-sky-200 rounded text-sm font-mono">$1</code>');
         elements.push(
-          <p key={elements.length} className="mb-3 text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: processedLine }} />
+          <p key={elements.length} className="mb-3 text-slate-700 dark:text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: processedLine }} />
         );
         return;
       }
@@ -102,7 +107,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
       if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**') && trimmedLine.length > 4) {
         flushParagraph();
         elements.push(
-          <p key={elements.length} className="mb-3 font-semibold text-sky-300">
+          <p key={elements.length} className="mb-3 font-semibold text-blue-700 dark:text-sky-300">
             {processInlineContent(trimmedLine.slice(2, -2))}
           </p>
         );
@@ -115,19 +120,20 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
         const listContent = trimmedLine.replace(/^\d+\.\s/, '');
         elements.push(
           <ol key={elements.length} className="mb-3 ml-4">
-            <li className="text-slate-300 mb-1 list-decimal">
+            <li className="text-slate-700 dark:text-slate-300 mb-1 list-decimal">
               {processInlineContent(listContent)}
             </li>
           </ol>
         );
         return;
       }
-        // List items (both - and * bullets)
+      
+      // List items (both - and * bullets)
       if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
         flushParagraph();
         elements.push(
           <ul key={elements.length} className="mb-3 ml-4">
-            <li className="text-slate-300 mb-1 list-disc">
+            <li className="text-slate-700 dark:text-slate-300 mb-1 list-disc">
               {processInlineContent(trimmedLine.slice(2))}
             </li>
           </ul>
@@ -231,7 +237,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
     });
     
     return finalParts;
-  };// Function to process bold and italic text
+  };
+
+  // Function to process bold and italic text
   const processBoldItalic = (text: string, startKey: number): (string | React.ReactElement)[] => {
     const parts: (string | React.ReactElement)[] = [];
     let remaining = text;
@@ -245,7 +253,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
         if (beforeBold) parts.push(beforeBold);
         
         parts.push(
-          <strong key={`bold-${key}`} className="font-semibold text-sky-300">
+          <strong key={`bold-${key}`} className="font-semibold text-blue-700 dark:text-sky-300">
             {boldMatch[1]}
           </strong>
         );
@@ -260,7 +268,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
           if (beforeBoldItalic) parts.push(beforeBoldItalic);
           
           parts.push(
-            <strong key={`bolditalic-${key}`} className="font-semibold italic text-sky-300">
+            <strong key={`bolditalic-${key}`} className="font-semibold italic text-blue-700 dark:text-sky-300">
               {boldItalicMatch[1]}
             </strong>
           );
@@ -275,7 +283,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
             if (beforeItalic) parts.push(beforeItalic);
             
             parts.push(
-              <em key={`italic-${key}`} className="italic text-sky-200">
+              <em key={`italic-${key}`} className="italic text-slate-600 dark:text-sky-200">
                 {italicMatch[1]}
               </em>
             );

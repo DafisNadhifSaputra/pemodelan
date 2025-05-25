@@ -322,15 +322,15 @@ KONTEKS JURNAL PENELITIAN - MODEL SEAR KECANDUAN GAME ONLINE:
     switch (length) {
       case 'singkat':
         return {
-          temperature: 0.2,
-          maxOutputTokens: 3072,
+          temperature: 0.1,
+          maxOutputTokens: 8192,
           topP: 0.8,
           topK: 20
         };
       case 'sedang':
         return {
           temperature: 0.3,
-          maxOutputTokens: 6072,
+          maxOutputTokens: 8192,
           topP: 0.8,
           topK: 30
         };

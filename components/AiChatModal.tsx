@@ -162,46 +162,41 @@ Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipaha
   };
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-2 md:p-4 modal-backdrop">
-      <div className="bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] md:h-[80vh] flex flex-col modal-content">        {/* Header */}
-        <header className="flex items-center justify-between p-3 md:p-4 border-b border-slate-700">
+  return (    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-2 md:p-4 modal-backdrop">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] md:h-[80vh] flex flex-col modal-content">        {/* Header */}
+        <header className="flex items-center justify-between p-3 md:p-4 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-2 md:space-x-3">
-            <ChatIcon className="w-5 h-5 md:w-6 md:h-6 text-sky-400" />
-            <h2 className="text-lg md:text-xl font-semibold text-sky-400">Chat dengan AI Gemini</h2>
+            <ChatIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-sky-400" />
+            <h2 className="text-lg md:text-xl font-semibold text-blue-600 dark:text-sky-400">Chat dengan AI Gemini</h2>
           </div>
           <div className="flex items-center space-x-2">
             {/* Response Length Selector */}
             <div className="flex items-center space-x-1">
-              <label className="text-xs text-slate-400">Panjang:</label>
-              <select
+              <label className="text-xs text-slate-400">Panjang:</label>              <select
                 value={responseLength}
                 onChange={(e) => setResponseLength(e.target.value as 'singkat' | 'sedang' | 'panjang')}
-                className="text-xs bg-slate-700 border border-slate-600 text-slate-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                className="text-xs bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-sky-400"
               >
                 <option value="singkat">Singkat</option>
                 <option value="sedang">Sedang</option>
                 <option value="panjang">Panjang</option>
               </select>
-            </div>
-            <button
+            </div>            <button
               onClick={clearChat}
-              className="px-2 md:px-3 py-1 text-xs md:text-sm bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-md transition-colors"
+              className="px-2 md:px-3 py-1 text-xs md:text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-md transition-colors"
             >
               Hapus Chat
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 md:p-2 text-slate-400 hover:text-red-400 transition-colors"
+              className="p-1.5 md:p-2 text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
             >
               <CloseIcon className="w-4 h-4 md:w-5 md:h-5" />
             </button>
           </div>
-        </header>
-
-        {/* Messages */}
+        </header>        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.length === 0 && (            <div className="text-center text-slate-400 mt-8">
+          {messages.length === 0 && (            <div className="text-center text-slate-600 dark:text-slate-400 mt-8">
               <ChatIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg mb-2">Mulai percakapan dengan AI</p>
               <p className="text-sm">Tanyakan apapun tentang simulasi SEAR dan hasil analisis!</p>
@@ -215,8 +210,8 @@ Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipaha
             >              <div
                 className={`max-w-[70%] rounded-lg px-4 py-3 ${
                   message.type === 'user'
-                    ? 'bg-sky-500 text-white'
-                    : 'bg-slate-700 text-slate-200'
+                    ? 'bg-blue-500 dark:bg-sky-500 text-white'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200'
                 }`}
               >
                 {message.type === 'user' ? (
@@ -225,29 +220,26 @@ Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipaha
                   <MarkdownRenderer content={message.content} />
                 )}
                 <div className={`text-xs mt-2 opacity-70 ${
-                  message.type === 'user' ? 'text-sky-100' : 'text-slate-400'
+                  message.type === 'user' ? 'text-blue-100 dark:text-sky-100' : 'text-slate-600 dark:text-slate-400'
                 }`}>
                   {message.timestamp.toLocaleTimeString()}
                 </div>
               </div>
             </div>
-          ))}
-            {isLoading && (
+          ))}          {isLoading && (
             <div className="flex justify-start">
-              <div className="max-w-[70%] rounded-lg px-4 py-3 bg-slate-700">
+              <div className="max-w-[70%] rounded-lg px-4 py-3 bg-slate-100 dark:bg-slate-700">
                 <div className="flex items-center space-x-2">
-                  <LoadingSpinner size="sm" className="text-sky-400" />
-                  <span className="text-slate-300">AI sedang berpikir...</span>
+                  <LoadingSpinner size="sm" className="text-blue-600 dark:text-sky-400" />
+                  <span className="text-slate-700 dark:text-slate-300">AI sedang berpikir...</span>
                 </div>
               </div>
             </div>
           )}
           
           <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input */}
-        <div className="p-4 border-t border-slate-700">
+        </div>        {/* Input */}
+        <div className="p-4 border-t border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-3">
             <input
               ref={inputRef}
@@ -256,18 +248,17 @@ Jawab berdasarkan konteks model SEAR di atas dengan penjelasan yang mudah dipaha
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Tanyakan sesuatu tentang simulasi SEAR..."
-              className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
+              className="flex-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-slate-900 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-sky-400 focus:border-transparent"
               disabled={isLoading}
-            />
-            <button
+            />            <button
               onClick={sendMessage}
               disabled={!inputValue.trim() || isLoading}
-              className="bg-sky-500 hover:bg-sky-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-colors"
+              className="bg-blue-500 hover:bg-blue-600 dark:bg-sky-500 dark:hover:bg-sky-600 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-colors"
             >
               <SendIcon className="w-5 h-5" />
             </button>
           </div>
-          <div className="mt-2 text-xs text-slate-500">
+          <div className="mt-2 text-xs text-slate-600 dark:text-slate-500">
             Tekan Enter untuk kirim, Shift+Enter untuk baris baru
           </div>
         </div>

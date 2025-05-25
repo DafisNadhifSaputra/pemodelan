@@ -329,8 +329,8 @@ const AppContent: React.FC = () => {
                     </div>
                 )}
             </div>
-            <div className="bg-slate-800 dark:bg-gray-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
-                <h2 className="text-xl md:text-2xl font-semibold mb-4 text-sky-400 dark:text-sky-300 flex items-center">
+            <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-xl p-4 md:p-6 card-hover">
+                <h2 className="text-xl md:text-2xl font-semibold mb-4 text-blue-600 dark:text-sky-400 flex items-center">
                     <SparklesIcon className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Analisis AI (Gemini)
                 </h2>
                 <LazyLoadWrapper fallback={
