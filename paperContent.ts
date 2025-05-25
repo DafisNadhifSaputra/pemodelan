@@ -1,6 +1,89 @@
 
 export const paperTitle = "Model SEIR Kecanduan Game Online pada Siswa di SMP Negeri 3 Makassar";
 
+// Diagram kompartemen SEIR
+export const compartmentDiagram = `
+DIAGRAM KOMPARTEMEN MODEL SEIR KECANDUAN GAME ONLINE:
+
+              Λ = μ₁N (Rekrutmen siswa dengan akses game)
+                        ↓
+    [S] ――α――→ [E] ――β――→ [I] ――γ+θ――→ [R]
+     ↓         ↓         ↓           ↓
+    μ₂        μ₂        μ₂          μ₂
+
+KETERANGAN:
+- S (Susceptible): Siswa berpotensi kecanduan game online
+- E (Exposed): Siswa yang mulai bermain game online  
+- I (Infected/Addicted): Siswa kecanduan game online
+- R (Recovered): Siswa yang pulih/berhenti bermain
+
+PARAMETER:
+- α = 0.438: Laju paparan S→E 
+- β = 0.102: Laju kecanduan E→I
+- γ = 0.051: Laju pemulihan alami I→R
+- θ = 0 atau 1: Efektivitas intervensi
+- μ₂ = 0.097: Laju keluar dari sistem
+
+R₀ = β/(γ + θ + μ₂) = 0.689 (tanpa intervensi), 0.089 (dengan intervensi)
+`;
+
+// Visualisasi grafik dari jurnal penelitian
+export const graphicVisualization = `
+GRAFIK SIMULASI MODEL SEIR:
+
+Gambar 2 - Tanpa Intervensi:
+- Kurva Susceptible (biru): Naik dari 72 → 135 siswa
+- Kurva Exposed (kuning): Naik dari 77 → 290 siswa  
+- Kurva Addicted (merah): Naik dari 18 → 200 siswa
+- Kurva Recovered (hijau): Naik dari 9 → 95 siswa
+
+Gambar 3 - Dengan Intervensi:
+- Kurva Susceptible (biru): Sama, naik dari 72 → 135 siswa
+- Kurva Exposed (kuning): Sama, naik dari 77 → 290 siswa
+- Kurva Addicted (merah): Puncak di bulan 8 (~30), turun ke 26 siswa
+- Kurva Recovered (hijau): Naik tajam dari 9 → 250 siswa
+
+Dampak Intervensi:
+- Kecanduan turun 87% (200 → 26 siswa)
+- Pemulihan naik 163% (95 → 250 siswa)
+`;
+
+// Instruksi khusus untuk AI analisis mendalam (hanya untuk opsi "panjang")
+export const aiAnalysisInstructions = `
+INSTRUKSI ANALISIS MENDALAM UNTUK AI (HANYA OPSI PANJANG):
+
+1. ANALISIS ASIMPTOTIK KURVA:
+- Jelaskan perilaku asimptotik setiap kurva (S, E, I, R) menuju nilai steady state
+- Berikan nilai asimptot: S(∞), E(∞), I(∞), R(∞) untuk kedua skenario
+- Analisis waktu konvergensi dan laju pendekatan ke steady state
+- Jelaskan mengapa kurva mencapai saturasi atau keseimbangan
+
+2. ALASAN NAIK/TURUN KURVA:
+- Kurva Susceptible (S): Mengapa naik meski ada outflow? (karena rekrutmen μ₁N > losses)
+- Kurva Exposed (E): Mengapa sigmoid? (balance antara inflow dari S dan outflow ke I)
+- Kurva Addicted (I): 
+  * Tanpa intervensi: Mengapa terus naik? (inflow β·E > outflow (γ+μ₂)·I)
+  * Dengan intervensi: Mengapa puncak lalu turun? (θ=1 meningkatkan outflow drastis)
+- Kurva Recovered (R): 
+  * Tanpa intervensi: Mengapa pertumbuhan lambat? (hanya γ·I sebagai inflow)
+  * Dengan intervensi: Mengapa eksponensial? ((γ+θ)·I meningkat signifikan)
+
+3. TITIK KRITIS & TRANSISI:
+- Jelaskan mengapa puncak I terjadi di bulan 8 dengan intervensi
+- Analisis crossover point R>I (mengapa di bulan 15?)
+- Efek delayed response dari intervensi (why not immediate?)
+
+4. DAMPAK PARAMETER:
+- Pengaruh θ=1 terhadap stabilitas sistem
+- Sensitivitas R₀ terhadap perubahan parameter intervensi
+- Implikasi praktis dari R₀ < 1 dalam konteks kecanduan game
+
+5. INTERPRETASI MATEMATIKA:
+- Hubungan eigenvalue dengan kecepatan konvergensi
+- Makna fisik dari matriks Jacobian dalam konteks kecanduan
+- Analisis bifurkasi dan critical threshold untuk intervensi
+`;
+
 export const paperFullText = `
 <div>
 <h1>Halaman 1</h1>

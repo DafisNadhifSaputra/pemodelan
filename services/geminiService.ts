@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import html2canvas from 'html2canvas';
 import type { SearParams, InitialConditions, SimulationDataPoint, AiInterpretationResponse } from '../types';
+import { paperFullText, paperTitle, aiAnalysisInstructions, compartmentDiagram, graphicVisualization } from '../paperContent';
 
 function getSimulationSummary(simulationData: SimulationDataPoint[], duration: number): string {
   if (!simulationData || simulationData.length === 0) {
@@ -53,7 +54,8 @@ export async function getAiChartAnalysis(
   nInitial: number,
   hasIntervention: boolean,
   durationMonths: number,
-  chartElementId?: string
+  chartElementId?: string,
+  responseLength: 'singkat' | 'sedang' | 'panjang' = 'sedang'
 ): Promise<AiInterpretationResponse> {
   const apiKey = "AIzaSyBcVgXj2SdTzq8e-dV8gWZOGWr9sM3vqnw";
 
@@ -70,28 +72,89 @@ export async function getAiChartAnalysis(
     
     if (!chartImage) {
       // Fallback to text-only analysis if chart capture fails
-      return await getAiInterpretation(params, initialConditions, simulationData, r0, nInitial, hasIntervention, durationMonths);
+      return await getAiInterpretation(params, initialConditions, simulationData, r0, nInitial, hasIntervention, durationMonths, undefined, responseLength);
     }
+
+    // Konfigurasi generasi berdasarkan panjang respon
+    const getGenerationConfig = (length: 'singkat' | 'sedang' | 'panjang') => {
+      switch (length) {
+        case 'singkat':
+          return {
+            temperature: 0.1,
+            maxOutputTokens: 4096,
+            topP: 0.8,
+            topK: 20
+          };
+        case 'sedang':
+          return {
+            temperature: 0.6,
+            maxOutputTokens: 8192,
+            topP: 0.9,
+            topK: 40
+          };
+        case 'panjang':
+          return {
+            temperature: 0.7,
+            maxOutputTokens: 12000,
+            topP: 0.9,
+            topK: 40
+          };
+        default:
+          return {
+            temperature: 0.6,
+            maxOutputTokens: 8192,
+            topP: 0.9,
+            topK: 40
+          };
+      }
+    };
 
     const ai = new GoogleGenerativeAI(apiKey);
     const model = ai.getGenerativeModel({ 
       model: 'gemini-2.5-flash-preview-05-20', // Updated to latest Gemini 2.0 Flash
-      generationConfig: {
-        temperature: 0.6, // Kreativitas sedang untuk analisis yang koheren namun informatif
-        maxOutputTokens: 8192, // Cukup untuk analisis detail dengan LaTeX
-        topP: 0.9,
-        topK: 40
-      }
+      generationConfig: getGenerationConfig(responseLength)
     });
 
     const simulationSummary = getSimulationSummary(simulationData, durationMonths);
 
-    const prompt = `
-ANALISIS GRAFIK MODEL SEAR KECANDUAN GAME ONLINE
+    // Template prompt berdasarkan panjang respon
+    const getChartPromptTemplate = (length: 'singkat' | 'sedang' | 'panjang') => {
+      // Konteks jurnal lengkap untuk analisis grafik
+      const chartJournalContext = `
+KONTEKS JURNAL PENELITIAN LENGKAP - ${paperTitle}:
 
-Anda adalah seorang ahli epidemiologi dan analis data yang memahami model SEAR. Analisis grafik simulasi ini dengan detail dalam Bahasa Indonesia.
+${paperFullText}
 
-**Data Konteks Simulasi:**
+RINGKASAN MATEMATIS KUNCI UNTUK ANALISIS GRAFIK:
+
+1. SISTEM PERSAMAAN DIFERENSIAL:
+   - dS/dt = Λ - (α + μ₂)S
+   - dE/dt = αS - (β + μ₂)E  
+   - dA/dt = βE - (γ + θ + μ₂)A
+   - dR/dt = (γ + θ)A - μ₂R
+
+2. PARAMETER EMPIRIS DARI PENELITIAN SMP NEGERI 3 MAKASSAR:
+   - α = 0.438 (laju paparan game)
+   - β = 0.102 (laju transisi ke kecanduan)
+   - γ = 0.051 (laju pemulihan alami)
+   - μ₁ = 0.409 (laju rekrutmen)
+   - μ₂ = 0.097 (laju keluar alami)
+   - θ = 1 (dengan intervensi) atau 0 (tanpa intervensi)
+
+3. HASIL PENELITIAN EMPIRIS:
+   - R₀ penelitian = 0.089 (< 1, tidak ada penularan)
+   - Tanpa intervensi: 200 siswa kecanduan dalam 36 bulan
+   - Dengan intervensi: hanya 26 siswa kecanduan dalam 36 bulan
+   - Populasi awal penelitian: 176 siswa (S₀=72, E₀=77, A₀=18, R₀=9)
+
+4. ASUMSI MODEL DARI PENELITIAN:
+   - Model berlaku untuk siswa SMP dengan akses game online
+   - Intervensi meliputi pengawasan orang tua dan bimbingan konseling
+   - Efektivitas intervensi terbukti sangat signifikan
+`;
+
+      const baseInfo = `
+**Data Konteks Simulasi Saat Ini:**
 - Parameter $\\alpha$ (paparan): ${params.alpha.toFixed(3)}
 - Parameter $\\beta$ (kecanduan): ${params.beta.toFixed(3)}
 - Parameter $\\gamma$ (pemulihan alami): ${params.gamma.toFixed(3)}
@@ -103,6 +166,43 @@ Anda adalah seorang ahli epidemiologi dan analis data yang memahami model SEAR. 
 - Populasi awal: ${nInitial}
 
 ${simulationSummary}
+`;
+
+      switch (length) {
+        case 'singkat':
+          return `
+ANALISIS RINGKAS GRAFIK MODEL SEAR KECANDUAN GAME ONLINE
+
+${chartJournalContext}
+
+Anda adalah seorang ahli epidemiologi. Berikan analisis SINGKAT dan PADAT dari grafik simulasi dalam Bahasa Indonesia.
+
+${baseInfo}
+
+**INSTRUKSI SINGKAT:**
+Analisis grafik secara ringkas dengan 3 section utama menggunakan format Markdown dan LaTeX:
+
+## 1. Pola Visual Kurva
+Deskripsikan tren utama setiap kurva S(t), E(t), A(t), R(t) secara singkat.
+
+## 2. Titik Kritis
+Identifikasi waktu puncak kecanduan A(t) dan dinamika utama.
+
+## 3. Interpretasi & Rekomendasi
+Analisis $R_0$ dan saran strategis berdasarkan pola grafik.
+
+**FORMAT:** Maksimal 400 kata, gunakan $LaTeX$ untuk matematika.
+`;
+
+        case 'sedang':
+          return `
+ANALISIS GRAFIK MODEL SEAR KECANDUAN GAME ONLINE
+
+${chartJournalContext}
+
+Anda adalah seorang ahli epidemiologi dan analis data yang memahami model SEAR. Analisis grafik simulasi ini dengan detail dalam Bahasa Indonesia.
+
+${baseInfo}
 
 **INSTRUKSI ANALISIS GRAFIK:**
 
@@ -141,6 +241,137 @@ Berdasarkan pola grafik, berikan saran untuk:
 
 Gunakan notasi matematika LaTeX yang tepat dan format Markdown untuk struktur yang jelas.
 `;
+
+        case 'panjang':
+          return `
+ANALISIS KOMPREHENSIF GRAFIK MODEL SEIR KECANDUAN GAME ONLINE
+
+${chartJournalContext}
+
+${compartmentDiagram}
+
+${graphicVisualization}
+
+INSTRUKSI ANALISIS MENDALAM:
+${aiAnalysisInstructions}
+
+Anda adalah seorang ahli epidemiologi senior dan analis data lanjutan. Berikan analisis mendalam dan komprehensif dari grafik simulasi dalam Bahasa Indonesia.
+
+${baseInfo}
+
+**INSTRUKSI ANALISIS GRAFIK KOMPREHENSIF:**
+
+Berikan analisis menggunakan format Markdown dan notasi LaTeX yang tepat. Struktur respons dengan heading yang jelas dan subheading untuk setiap section.
+
+## 1. Analisis Visual Kurva & Karakteristik Matematis
+### 1.1 Kurva Susceptible $S(t)$ [Biru]
+- Bentuk kurva dan pola matematis (eksponensial, linear, sigmoid)
+- **ANALISIS ASIMPTOTIK:** Nilai $S(\\infty)$ dan laju konvergensi
+- **ALASAN NAIK/TURUN:** Mengapa $S(t)$ naik meski ada outflow? Jelaskan balance antara rekrutmen $\\mu_1 N$ dan losses $(\\alpha + \\mu_2)S$
+
+### 1.2 Kurva Exposed $E(t)$ [Kuning]  
+- Karakteristik sigmoid dan inflection point
+- **ANALISIS ASIMPTOTIK:** Kapan mencapai saturasi $E(\\infty)$
+- **ALASAN SIGMOID:** Mengapa berbentuk S? Balance antara inflow $\\alpha S$ dan outflow $(\\beta + \\mu_2)E$
+
+### 1.3 Kurva Addicted $A(t)$ [Merah] - KUNCI UTAMA
+- **Tanpa intervensi:** Mengapa pertumbuhan eksponensial berkelanjutan?
+- **Dengan intervensi:** Mengapa ada puncak di bulan ~8 lalu turun drastis?
+- **ANALISIS ASIMPTOTIK:** $A(\\infty)$ untuk kedua skenario
+- **ALASAN PERUBAHAN:** Jelaskan secara detail mengapa intervensi $\\theta=1$ mengubah $\\frac{dA}{dt} = \\beta E - (\\gamma + \\theta + \\mu_2)A$ dari positif ke negatif
+
+### 1.4 Kurva Recovered $R(t)$ [Hijau]
+- **Tanpa intervensi:** Mengapa pertumbuhan linear lambat?
+- **Dengan intervensi:** Mengapa eksponensial cepat setelah bulan 12?
+- **ANALISIS ASIMPTOTIK:** Perbedaan $R(\\infty)$ kedua skenario
+- **MEKANISME PERCEPATAN:** Jelaskan efek $(\\gamma + \\theta)A$ pada laju recovery
+
+## 2. Titik Kritis & Fase Transisi Matematis
+### 2.1 Critical Points Analysis
+- **Puncak Kecanduan:** Mengapa tepat di bulan 8 dengan intervensi?
+- **Crossover Point:** Kapan dan mengapa $R(t) > A(t)$?
+- **Equilibrium Approach:** Waktu konvergensi ke steady state
+
+### 2.2 Delayed Response Phenomenon
+- Mengapa intervensi tidak langsung efektif?
+- Lag time antara implementasi $\\theta=1$ dan penurunan $A(t)$
+- Interpretasi biologis dari delayed response
+
+## 3. Dinamika Model SEIR & Analisis Kompartemen
+### 3.1 Flow Analysis Detail
+- $\\frac{dS}{dt} = \\mu_1 N - (\\alpha + \\mu_2)S$: Net balance analysis
+- $\\frac{dE}{dt} = \\alpha S - (\\beta + \\mu_2)E$: Accumulation vs progression
+- $\\frac{dA}{dt} = \\beta E - (\\gamma + \\theta + \\mu_2)A$: KUNCI - analisis tanda
+- $\\frac{dR}{dt} = (\\gamma + \\theta)A - \\mu_2 R$: Recovery acceleration
+
+### 3.2 Parameter Sensitivity dari Grafik
+- Dampak visual perubahan $\\alpha$, $\\beta$, $\\gamma$ pada kurva
+- Sensitivitas $R_0$ terhadap $\\theta$: dari 0.689 → 0.089
+- Critical threshold analysis
+
+## 4. Interpretasi Epidemiologi Lanjutan
+### 4.1 Basic Reproduction Number
+- $R_0 = \\frac{\\beta}{\\gamma + \\theta + \\mu_2}$: Interpretasi dari grafik
+- Mengapa $R_0 < 1$ tidak menjamin penurunan immediate?
+- Hubungan $R_0$ dengan asimptotik behavior
+
+### 4.2 Stabilitas Sistem
+- Eigenvalue analysis dari grafik pattern
+- Kecepatan konvergensi berbeda tiap kurva
+- Makna fisik dari matriks Jacobian dalam konteks kecanduan
+
+### 4.3 Bifurcation Analysis
+- Critical intervention threshold
+- Regime change pada $\\theta = 0$ vs $\\theta = 1$
+- Implications untuk desain intervensi
+
+## 5. Area Under Curve & Burden Analysis
+### 5.1 Disease Burden Calculation
+- $\\int_0^{36} A(t) dt$: Total person-months kecanduan
+- Perbandingan kuantitatif kedua skenario
+- Cost-effectiveness implications
+
+### 5.2 Recovery Acceleration Analysis
+- $\\int_0^{36} R(t) dt$: Total recovery achieved
+- Exponential vs linear growth impact
+- Long-term sustainability
+
+## 6. Validasi dengan Data Empiris SMP Negeri 3 Makassar
+### 6.1 Model Validation
+- Perbandingan grafik dengan data penelitian
+- Goodness of fit assessment
+- Parameter calibration quality
+
+### 6.2 Real-world Implications
+- Generalizability ke sekolah lain
+- Scalability considerations
+- Implementation feasibility
+
+## 7. Rekomendasi Strategis Berbasis Grafik
+### 7.1 Optimal Intervention Timing
+- Golden window berdasarkan pola kurva
+- Early intervention vs late intervention
+- Resource allocation optimization
+
+### 7.2 Monitoring Strategy
+- Key indicators dari grafik pattern
+- Early warning systems
+- Adaptive intervention protocols
+
+### 7.3 Policy Implications
+- Evidence-based recommendations
+- Risk stratification
+- Long-term sustainability
+
+**CATATAN:** Fokuskan pada **ALASAN MATEMATIS** mengapa kurva naik/turun, **ANALISIS ASIMPTOTIK** detailed, dan **INTERPRETASI FISIK** dari setiap fenomena yang terlihat di grafik. Gunakan LaTeX notation yang tepat untuk semua formula matematika.
+`;
+
+        default:
+          return getChartPromptTemplate('sedang');
+      }
+    };
+
+    const prompt = getChartPromptTemplate(responseLength);
 
     // Convert base64 to the format Gemini expects
     const base64Data = chartImage.split(',')[1];
@@ -278,7 +509,11 @@ export async function getAiInterpretation(
 
   // Konteks jurnal lengkap untuk AI
   const journalContext = `
-KONTEKS JURNAL PENELITIAN - MODEL SEAR KECANDUAN GAME ONLINE:
+KONTEKS JURNAL PENELITIAN LENGKAP - ${paperTitle}:
+
+${paperFullText}
+
+RINGKASAN MATEMATIS KUNCI:
 
 1. DEFINISI MODEL SEAR:
    - S (Susceptible): Individu rentan yang belum terpapar game online
@@ -293,28 +528,33 @@ KONTEKS JURNAL PENELITIAN - MODEL SEAR KECANDUAN GAME ONLINE:
    - dR/dt = (γ + θ)A - μ₂R
    Dimana Λ = μ₁ × N (laju rekrutmen baru)
 
-3. PARAMETER KUNCI:
-   - α: Laju transisi S→E (paparan game)
-   - β: Laju transisi E→A (menjadi kecanduan)
-   - γ: Laju pemulihan alami A→R
+3. PARAMETER KUNCI DARI PENELITIAN:
+   - α: Laju transisi S→E (paparan game) = 0.438
+   - β: Laju transisi E→A (menjadi kecanduan) = 0.102
+   - γ: Laju pemulihan alami A→R = 0.051
    - θ: Efektivitas intervensi (0=tanpa, 1=dengan intervensi)
-   - μ₁: Laju rekrutmen populasi baru
-   - μ₂: Laju keluar alami
+   - μ₁: Laju rekrutmen populasi baru = 0.409
+   - μ₂: Laju keluar alami = 0.097
 
-4. BASIC REPRODUCTION NUMBER:
-   R₀ = (αβ)/((β + μ₂)(γ + θ + μ₂))
+4. BASIC REPRODUCTION NUMBER DARI PENELITIAN:
+   R₀ = β/(γ + θ + μ₂) = 0.089 (< 1, menunjukkan tidak ada penularan)
    - R₀ > 1: Kecanduan menyebar dan menjadi endemik
    - R₀ < 1: Kecanduan menghilang secara alami
 
-5. ANALISIS INTERVENSI:
-   - θ = 0: Tidak ada program intervensi, pemulihan hanya alami
-   - θ = 1: Program konseling, terapi, dan dukungan sosial aktif
-   - Intervensi meningkatkan laju pemulihan secara signifikan
+5. HASIL PENELITIAN EMPIRIS:
+   - Tanpa intervensi: Kecanduan mencapai 200 siswa dalam 36 bulan
+   - Dengan intervensi: Kecanduan turun menjadi 26 siswa dalam 36 bulan
+   - Efektivitas intervensi sangat signifikan dalam mengurangi beban kecanduan
 
-6. IMPLIKASI PRAKTIS:
-   - Model membantu perencaan kebijakan kesehatan mental
-   - Dapat memprediksi dampak intervensi pada populasi
-   - Berguna untuk strategi pencegahan kecanduan game online
+6. TITIK KESEIMBANGAN:
+   - E₀ (bebas kecanduan): Stabil dengan eigenvalue negatif
+   - E_ε (dengan kecanduan): Juga stabil dalam kondisi tertentu
+
+7. IMPLIKASI PRAKTIS BERDASARKAN PENELITIAN:
+   - Pengawasan orang tua sangat efektif
+   - Program bimbingan konseling menurunkan kecanduan secara signifikan
+   - Seminar edukasi dampak game online diperlukan
+   - Model dapat digunakan untuk perencanaan kebijakan sekolah
 `;
 
   // Konfigurasi generasi berdasarkan panjang respon

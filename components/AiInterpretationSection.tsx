@@ -9,7 +9,7 @@ interface AiInterpretationSectionProps {
   isLoading: boolean;
   error: string | null;
   onRefresh: (responseLength?: 'singkat' | 'sedang' | 'panjang') => void;
-  onRefreshWithChart: () => void;
+  onRefreshWithChart: (responseLength?: 'singkat' | 'sedang' | 'panjang') => void;
   onOpenChat: () => void;
 }
 
@@ -75,7 +75,7 @@ const AiInterpretationSection: React.FC<AiInterpretationSectionProps> = ({
                   Analisis Teks
               </button>
               <button
-                  onClick={onRefreshWithChart}
+                  onClick={() => onRefreshWithChart(responseLength)}
                   className="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md text-sm flex items-center justify-center"
                   aria-label="Dapatkan Analisis AI dengan Grafik"
               >
@@ -122,7 +122,7 @@ const AiInterpretationSection: React.FC<AiInterpretationSectionProps> = ({
                 Perbarui Analisis
             </button>
             <button
-                onClick={onRefreshWithChart}
+                onClick={() => onRefreshWithChart(responseLength)}
                 className="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md text-sm flex items-center justify-center"
                 aria-label="Analisis dengan Grafik"
             >

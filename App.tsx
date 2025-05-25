@@ -137,7 +137,8 @@ const AppContent: React.FC = () => {
     currentSimData: SimulationDataPoint[],
     r0: number,
     nInitial: number,
-    interventionStatus: boolean
+    interventionStatus: boolean,
+    responseLength?: 'singkat' | 'sedang' | 'panjang'
   ) => {
     // Function for AI chart analysis with vision capabilities
     setIsGeneratingInterpretation(true);
@@ -152,7 +153,8 @@ const AppContent: React.FC = () => {
         nInitial,
         interventionStatus,
         SIMULATION_DURATION_MONTHS,
-        'simulation-chart' // Chart element ID
+        'simulation-chart', // Chart element ID
+        responseLength || 'sedang'
       );
       if (interpretationResult.success && interpretationResult.interpretation) {
         setAiInterpretation(interpretationResult.interpretation);
@@ -349,7 +351,7 @@ const AppContent: React.FC = () => {
                         isLoading={isGeneratingInterpretation}
                         error={interpretationError}
                         onRefresh={(responseLength = 'sedang') => fetchAndSetAiInterpretation(params, initialConditions, simulationData, currentR0, N_initial, hasIntervention, responseLength)}
-                        onRefreshWithChart={() => fetchAndSetAiChartAnalysis(params, initialConditions, simulationData, currentR0, N_initial, hasIntervention)}
+                        onRefreshWithChart={(responseLength = 'sedang') => fetchAndSetAiChartAnalysis(params, initialConditions, simulationData, currentR0, N_initial, hasIntervention, responseLength)}
                         onOpenChat={() => setIsAiChatOpen(true)}
                     />
                 </LazyLoadWrapper>
@@ -371,14 +373,15 @@ const AppContent: React.FC = () => {
             Terinspirasi dari penelitian: Syafruddin Side, Nurul Azizah Muzakir, Dian Pebriani, Syana Nurul Utari (2020)
           </p>
         </div>
-      </footer>        {isPaperModalOpen && (
-          <LazyLoadWrapper fallback={<ModalSkeleton />}>
+      </footer>
+      {isPaperModalOpen && (
+          
             <PaperModal
               isOpen={isPaperModalOpen}
               onClose={() => setIsPaperModalOpen(false)}
               title="Model SEIR Kecanduan Game Online pada Siswa di SMP Negeri 3 Makassar"
             />
-          </LazyLoadWrapper>
+         
         )}
 
         {isAiChatOpen && (
