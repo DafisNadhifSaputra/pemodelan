@@ -19,10 +19,14 @@ class LazyErrorBoundary extends React.Component<
 
   static getDerivedStateFromError(_: Error) {
     return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('LazyLoadWrapper Error:', error, errorInfo);
+  }  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('LazyLoadWrapper Error:', 
+      JSON.stringify({
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack
+      })
+    );
   }
 
   render() {

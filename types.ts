@@ -1,4 +1,3 @@
-
 export interface SearParams {
   mu1: number; // Recruitment rate related to N_initial
   mu2: number; // General exit rate from each compartment
@@ -33,4 +32,40 @@ export interface AiInterpretationResponse {
     success: boolean;
     interpretation?: string;
     error?: string;
+}
+
+export interface EquilibriumPoint {
+  S: number;
+  E: number;
+  A: number;
+  R: number;
+  type: 'disease-free' | 'endemic';
+  stability: 'stable' | 'unstable' | 'unknown';
+}
+
+export interface EquilibriumAnalysis {
+  diseaseFreePreviouslyExists: boolean;
+  diseaseFreePoint?: EquilibriumPoint;
+  endemicExists: boolean;
+  endemicPoint?: EquilibriumPoint;
+  R0: number;
+  timeToEquilibrium?: number; // estimated time in months
+}
+
+// Interface untuk kompatibilitas dengan simulator revisi
+export interface SimulationParameters {
+  alpha: number;  // β - laju transmisi
+  beta: number;   // σ - laju progresivitas
+  delta: number;  // γ - laju pemulihan alami
+  theta: number;  // θ - efektivitas intervensi
+  mu1: number;    // tidak digunakan di model revisi
+  mu2: number;    // μ - laju keluar alami
+}
+
+export interface SimulationData {
+  time: number;
+  S: number;
+  E: number;
+  A: number; // Addicted (mengganti I)
+  R: number;
 }

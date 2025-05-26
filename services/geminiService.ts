@@ -40,7 +40,7 @@ async function captureChartAsImage(chartElementId: string = 'simulation-chart'):
 
     return canvas.toDataURL('image/jpeg', 0.8);
   } catch (error) {
-    console.error('Error capturing chart:', error);
+    console.error('Error capturing chart:', error instanceof Error ? error.message : String(error));
     return null;
   }
 }
@@ -379,7 +379,7 @@ ${hasIntervention ?
       text = response.text();
       console.log('Successfully extracted vision text using response.text()');
     } catch (textError) {
-      console.error('Error getting text from vision response:', textError);
+      console.error('Error getting text from vision response:', textError instanceof Error ? textError.message : String(textError));
       // Try alternative method to get text
       if (response.candidates && response.candidates.length > 0 && response.candidates[0].content) {
         const parts = response.candidates[0].content.parts;
@@ -399,7 +399,7 @@ ${hasIntervention ?
       return { success: false, error: "Tidak ada respons teks dari AI Vision. Response kosong atau tidak valid." };
     }
   } catch (error: any) {
-    console.error("Gemini Vision API error:", error);
+    console.error("Gemini Vision API error:", error instanceof Error ? error.message : String(error));
     let errorMessage = "Gagal menghubungi layanan AI Gemini Vision.";
     
     // Check for safety filter blocks
@@ -821,7 +821,7 @@ ${baseInfo}
         text = response.text();
         console.log('Successfully extracted text using response.text()');
       } catch (textError) {
-        console.error('Error getting text from response:', textError);
+        console.error('Error getting text from response:', textError instanceof Error ? textError.message : String(textError));
         // Try alternative method to get text
         if (response.candidates && response.candidates.length > 0 && response.candidates[0].content) {
           const parts = response.candidates[0].content.parts;
@@ -869,7 +869,7 @@ ${baseInfo}
             break;
           }
         } catch (fallbackError) {
-          console.error(`Fallback model ${fallbackModelName} failed:`, fallbackError);
+          console.error(`Fallback model ${fallbackModelName} failed:`, fallbackError instanceof Error ? fallbackError.message : String(fallbackError));
           continue;
         }
       }
@@ -888,7 +888,7 @@ ${baseInfo}
       return { success: false, error: "Tidak ada respons teks dari AI. Response kosong atau tidak valid." };
     }
   } catch (error: any) {
-    console.error("Gemini API error:", error);
+    console.error("Gemini API error:", error instanceof Error ? error.message : String(error));
     let errorMessage = "Gagal menghubungi layanan AI Gemini.";
     
     // Check for safety filter blocks

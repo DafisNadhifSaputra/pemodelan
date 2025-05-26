@@ -1,0 +1,287 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[bahasa]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{amsfonts}
+\geometry{a4paper, margin=1in}
+\usepackage{setspace}
+\onehalfspacing
+
+% Paket untuk diagram TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+\newtheorem{theorem}{Teorema}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}{Definisi}
+
+\title{Revisi Model Matematika SEIR Penyebaran Kecanduan Game Online dengan Mempertimbangkan Interaksi Sosial dan Kemungkinan Pemulihan Dini}
+\author{Analisis Model oleh Dafis Nadhif Saputra \\ (Berdasarkan Paper Asli oleh Syafruddin Side, dkk.)}
+\date{\today}
+
+\begin{document}
+\maketitle
+\begin{center}
+    \textbf{Abstrak Revisi}
+\end{center}
+\textit{Penelitian ini bertujuan untuk merevisi dan menganalisis model matematika SEIR untuk penyebaran kecanduan game online dengan memperkenalkan mekanisme penularan yang bergantung pada interaksi sosial dan kemungkinan pemulihan dini dari tahap terpapar. Model asli mengasumsikan transisi dari rentan ke terpapar tidak dipengaruhi oleh individu yang sudah kecanduan, dan tidak ada jalur pemulihan langsung dari tahap terpapar. Revisi ini mengasumsikan bahwa individu rentan dapat terpapar karena interaksi dengan individu kecanduan, dan individu yang baru terpapar memiliki kemungkinan untuk pulih sebelum menjadi kecanduan sepenuhnya. Analisis model yang direvisi meliputi penentuan titik keseimbangan bebas kecanduan, perhitungan bilangan reproduksi dasar ($R_0$) menggunakan metode matriks generasi berikutnya, dan analisis kestabilan titik keseimbangan bebas kecanduan berdasarkan nilai eigen dari matriks Jacobian. Hasil analisis menunjukkan bahwa titik keseimbangan bebas kecanduan akan stabil jika $R_0 < 1$, memberikan interpretasi yang lebih standar mengenai ambang batas penyebaran kecanduan.}
+
+\vspace{0.5cm}
+\noindent
+\textbf{Kata Kunci Revisi:} Model Matematika, Kecanduan Game Online, Model SEIR, Interaksi Sosial, Bilangan Reproduksi Dasar, Kestabilan Model.
+
+\section{Pendahuluan}
+Kecanduan game online telah menjadi isu signifikan yang mempengaruhi berbagai kalangan, terutama remaja. Pemodelan matematika dapat menjadi alat yang berguna untuk memahami dinamika penyebaran kecanduan dan mengevaluasi potensi strategi intervensi. Paper asli oleh Side dkk. (2020) menyajikan model SEIR untuk kecanduan game online. Namun, model tersebut memiliki beberapa keterbatasan dalam mekanisme transisi dan interpretasi bilangan reproduksi dasarnya.
+
+Revisi ini mengusulkan modifikasi pada model SEIR asli dengan dua perubahan utama:
+\begin{enumerate}
+    \item Transisi dari kompartemen rentan (Susceptible, S) ke kompartemen terpapar (Exposed, E) dimodelkan sebagai proses yang dipengaruhi oleh interaksi dengan individu yang sudah kecanduan (Infected, I). Ini mencerminkan aspek penularan sosial dari kecanduan.
+    \item Individu dalam kompartemen terpapar (E) memiliki kemungkinan untuk pulih (Recovered, R) secara langsung, tanpa harus melalui tahap kecanduan (I). Ini merepresentasikan individu yang mencoba game namun berhenti sebelum menjadi adiktif.
+\end{enumerate}
+Tujuan dari revisi ini adalah untuk membangun model yang lebih realistis secara epidemiologis, menganalisis titik keseimbangannya, menurunkan bilangan reproduksi dasar ($R_0$) yang lebih interpretatif, dan mengkaji kestabilan titik keseimbangan bebas kecanduan.
+
+\section{Model Matematika yang Direvisi}
+Populasi total, $N(t)$, pada waktu $t$ dibagi menjadi empat kompartemen:
+\begin{itemize}
+    \item $S(t)$: Jumlah individu yang rentan terhadap kecanduan game online.
+    \item $E(t)$: Jumlah individu yang terpapar atau mulai mencoba game online tetapi belum kecanduan.
+    \item $I(t)$: Jumlah individu yang sudah kecanduan game online.
+    \item $R(t)$: Jumlah individu yang telah pulih atau berhenti bermain game online.
+\end{itemize}
+Sehingga, $N(t) = S(t) + E(t) + I(t) + R(t)$.
+
+\subsection{Asumsi Model yang Direvisi}
+Model yang direvisi didasarkan pada asumsi-asumsi berikut:
+\begin{enumerate}
+    \item Terdapat laju rekrutmen konstan ($\Lambda$) ke dalam kompartemen rentan (S).
+    \item Individu di setiap kompartemen memiliki laju keluar alami (misalnya, lulus sekolah, berhenti menjadi subjek penelitian, atau kematian alami dalam konteks epidemiologi umum) sebesar $\mu$.
+    \item Individu rentan (S) dapat terpapar game online melalui kontak atau interaksi dengan individu yang sudah kecanduan (I) dengan laju transmisi efektif $\beta$. Laju insidensi baru dimodelkan dengan bentuk standar $\frac{\beta S I}{N}$.
+    \item Individu yang terpapar (E) dapat berkembang menjadi kecanduan (I) dengan laju $\sigma$.
+    \item Individu yang terpapar (E) juga memiliki kemungkinan untuk pulih atau berhenti bermain (R) sebelum menjadi kecanduan, dengan laju $\delta$.
+    \item Individu yang kecanduan (I) dapat pulih (R) dengan laju $\gamma$. Laju pemulihan ini dapat ditingkatkan dengan adanya intervensi (misalnya, pengawasan orang tua, bimbingan konseling), yang direpresentasikan oleh parameter $\theta$. Jadi, laju pemulihan total dari I adalah $(\gamma + \theta)$.
+    \item Individu yang pulih (R) diasumsikan mendapatkan imunitas permanen atau tidak kembali ke status rentan dalam periode model.
+\end{enumerate}
+
+\subsection{Variabel dan Parameter Model yang Direvisi}
+Variabel dan parameter yang digunakan dalam model yang direvisi disajikan pada Tabel 1.
+
+\begin{table}[h!]
+\centering
+\caption{Variabel dan Parameter Model SEIR yang Direvisi}
+\begin{tabular}{ll}
+\hline
+Simbol & Keterangan \\
+\hline
+$S(t)$ & Jumlah individu rentan pada waktu $t$ \\
+$E(t)$ & Jumlah individu terpapar pada waktu $t$ \\
+$I(t)$ & Jumlah individu kecanduan pada waktu $t$ \\
+$R(t)$ & Jumlah individu pulih pada waktu $t$ \\
+$N(t)$ & Populasi total pada waktu $t$ \\
+$\Lambda$ & Laju rekrutmen individu baru ke dalam kompartemen S (konstan) \\
+$\mu$ & Laju keluar alami dari setiap kompartemen (mis. kematian alami) \\
+$\beta$ & Laju transmisi efektif kecanduan per kontak antara S dan I \\
+$\sigma$ & Laju progresivitas dari terpapar (E) menjadi kecanduan (I) \\
+$\delta$ & Laju pemulihan dini dari terpapar (E) menjadi pulih (R) \\
+$\gamma$ & Laju pemulihan alami dari kecanduan (I) menjadi pulih (R) \\
+$\theta$ & Efektivitas tambahan dari intervensi dalam pemulihan dari I ke R \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Sistem Persamaan Diferensial Model yang Direvisi}
+Berdasarkan asumsi di atas, model matematika SEIR yang direvisi untuk penyebaran kecanduan game online dapat dinyatakan dalam sistem persamaan diferensial non-linier berikut:
+\begin{align}
+\frac{dS}{dt} &= \Lambda - \frac{\beta S I}{N} - \mu S \label{eq:S}\\
+\frac{dE}{dt} &= \frac{\beta S I}{N} - (\sigma + \delta + \mu)E \label{eq:E}\\
+\frac{dI}{dt} &= \sigma E - (\gamma + \theta + \mu)I \label{eq:I}\\
+\frac{dR}{dt} &= \delta E + (\gamma + \theta)I - \mu R \label{eq:R}
+\end{align}
+dengan $N = S+E+I+R$. Untuk penyederhanaan analisis $R_0$ dan kestabilan titik keseimbangan bebas kecanduan, seringkali $N$ pada suku transmisi $\frac{\beta SI}{N}$ dianggap konstan atau mendekati populasi total pada kondisi bebas kecanduan, yaitu $N \approx S^0 = \Lambda/\mu$.
+
+\subsection{Diagram Kompartemen Model yang Direvisi}
+Diagram alir kompartemen untuk model yang direvisi disajikan pada Gambar \ref{fig:diagram_seir_revisi}.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+    node distance=2.5cm and 3cm, % Jarak antar node
+    compartment/.style={rectangle, draw=blue!60, fill=blue!10, very thick, minimum size=1cm, text width=1.5cm, align=center},
+    arrow_style/.style={-Latex, thick},
+    label_style/.style={midway, fill=white, inner sep=1pt, font=\scriptsize}
+]
+% Nodes (Kompartemen)
+\node[compartment] (S) {$S$};
+\node[compartment, right=of S] (E) {$E$};
+\node[compartment, right=of E] (I) {$I$};
+\node[compartment, right=of I] (R) {$R$};
+
+% Node dummy untuk rekrutmen
+\node[left=1.5cm of S] (entry) {};
+
+% Panah dan Label
+% Rekrutmen
+\draw[arrow_style] (entry) -- (S) node[label_style, above] {$\Lambda$};
+
+% S -> E
+\draw[arrow_style] (S) -- (E) node[label_style, above] {$\frac{\beta SI}{N}$};
+
+% E -> I
+\draw[arrow_style] (E) -- (I) node[label_style, above] {$\sigma E$};
+
+% I -> R
+\draw[arrow_style] (I) -- (R) node[label_style, above] {$(\gamma+\theta)I$};
+
+% E -> R (pemulihan dini)
+\draw[arrow_style] (E.south) .. controls +(south:1cm) and +(south:1cm) .. (R.south west) node[label_style, below, pos=0.5] {$\delta E$};
+
+% Pengaruh I pada transisi S -> E (panah putus-putus)
+% Membuat node dummy di atas panah S->E untuk target panah pengaruh
+\coordinate (mid_S_E) at ($(S)!0.5!(E)$);
+\draw[arrow_style, dashed, red!70] (I.north) .. controls +(north:0.8cm) and +(north:0.8cm) .. (mid_S_E |- I.north) node[label_style, above, red!70, pos=0.6] {\textit{pengaruh I}};
+
+
+% Laju keluar alami (kematian)
+\node[below=1cm of S] (deathS) {};
+\draw[arrow_style] (S) -- (deathS) node[label_style, left] {$\mu S$};
+
+\node[below=1cm of E] (deathE) {};
+\draw[arrow_style] (E) -- (deathE) node[label_style, left] {$\mu E$};
+
+\node[below=1cm of I] (deathI) {};
+\draw[arrow_style] (I) -- (deathI) node[label_style, left] {$\mu I$};
+
+\node[below=1cm of R] (deathR) {};
+\draw[arrow_style] (R) -- (deathR) node[label_style, left] {$\mu R$};
+
+\end{tikzpicture}
+\caption{Diagram alir kompartemen untuk model SEIR kecanduan game online yang direvisi.}
+\label{fig:diagram_seir_revisi}
+\end{figure}
+
+
+\section{Analisis Model yang Direvisi}
+
+\subsection{Titik Keseimbangan}
+Titik keseimbangan model diperoleh dengan mengatur sisi kanan sistem persamaan (\ref{eq:S})-(\ref{eq:R}) sama dengan nol.
+
+\subsubsection{Titik Keseimbangan Bebas Kecanduan ($E_0^{rev}$)}
+Titik keseimbangan bebas kecanduan adalah kondisi di mana tidak ada individu yang terpapar maupun kecanduan, yaitu $E=0$ dan $I=0$.
+Dari $\frac{dI}{dt} = 0$: $\sigma E - (\gamma + \theta + \mu)I = 0$. Jika $I=0$, maka $\sigma E = 0$. Jika $\sigma > 0$, maka $E=0$.
+Dari $\frac{dE}{dt} = 0$: $\frac{\beta S I}{N} - (\sigma + \delta + \mu)E = 0$. Jika $E=0$ dan $I=0$, persamaan ini terpenuhi ($0=0$).
+Dari $\frac{dS}{dt} = 0$: $\Lambda - \frac{\beta S I}{N} - \mu S = 0$. Jika $I=0$, maka $\Lambda - \mu S = 0$, sehingga $S = \frac{\Lambda}{\mu}$.
+Dari $\frac{dR}{dt} = 0$: $\delta E + (\gamma + \theta)I - \mu R = 0$. Jika $E=0$ dan $I=0$, maka $-\mu R = 0$, sehingga $R=0$ (dengan asumsi $\mu > 0$).
+
+Jadi, titik keseimbangan bebas kecanduan yang direvisi adalah:
+$$ E_0^{rev} = (S^0, E^0, I^0, R^0) = \left(\frac{\Lambda}{\mu}, 0, 0, 0\right) $$
+Pada titik ini, populasi total adalah $N^0 = S^0 = \Lambda/\mu$.
+
+\subsubsection{Titik Keseimbangan Endemik/Kecanduan ($E_1^{rev}$)}
+Titik keseimbangan endemik adalah kondisi di mana kecanduan tetap ada dalam populasi ($I > 0$). Titik ini dapat dicari dengan mengatur $\frac{dS}{dt}=\frac{dE}{dt}=\frac{dI}{dt}=\frac{dR}{dt}=0$ dan $I \neq 0$. Penurunan eksplisitnya bisa kompleks, namun keberadaannya bergantung pada nilai $R_0$.
+
+\subsection{Bilangan Reproduksi Dasar ($R_0$)}
+Bilangan reproduksi dasar, $R_0$, adalah jumlah rata-rata kasus sekunder kecanduan yang dihasilkan oleh satu individu kecanduan selama periode infeksiusnya ketika dimasukkan ke dalam populasi yang sepenuhnya rentan. $R_0$ dihitung menggunakan metode matriks generasi berikutnya (Next Generation Matrix) oleh van den Driessche dan Watmough.
+
+Kompartemen yang terkait dengan "infeksi" baru adalah $E$ dan $I$.
+Persamaan untuk $E$ dan $I$ adalah:
+\begin{align*}
+\frac{dE}{dt} &= \frac{\beta S I}{N} - (\sigma + \delta + \mu)E \\
+\frac{dI}{dt} &= \sigma E - (\gamma + \theta + \mu)I
+\end{align*}
+Misalkan $k_E = \sigma + \delta + \mu$ dan $k_I = \gamma + \theta + \mu$.
+Pada titik keseimbangan bebas kecanduan $E_0^{rev}$, $S = S^0 = \Lambda/\mu$ dan $N \approx N^0 = \Lambda/\mu$.
+Maka, suku transmisi $\frac{\beta S I}{N}$ menjadi $\frac{\beta (\Lambda/\mu) I}{(\Lambda/\mu)} = \beta I$.
+
+Matriks $\mathcal{F}$ (transmisi infeksi baru) dan $\mathcal{V}$ (transisi antar kompartemen infeksi) adalah:
+$$ \mathcal{F}(x) = \begin{pmatrix} \beta I \\ 0 \end{pmatrix}, \quad \mathcal{V}(x) = \begin{pmatrix} k_E E \\ -\sigma E + k_I I \end{pmatrix} $$
+dengan $x = (E, I)^T$.
+Jacobian dari $\mathcal{F}$ dan $\mathcal{V}$ pada $E_0^{rev}$ adalah:
+$$ F = \left. \frac{\partial \mathcal{F}_i}{\partial x_j} \right|_{E_0^{rev}} = \begin{pmatrix} 0 & \beta \\ 0 & 0 \end{pmatrix} $$
+$$ V = \left. \frac{\partial \mathcal{V}_i}{\partial x_j} \right|_{E_0^{rev}} = \begin{pmatrix} k_E & 0 \\ -\sigma & k_I \end{pmatrix} $$
+Invers dari $V$:
+$$ V^{-1} = \frac{1}{k_E k_I} \begin{pmatrix} k_I & 0 \\ \sigma & k_E \end{pmatrix} = \begin{pmatrix} 1/k_E & 0 \\ \sigma/(k_E k_I) & 1/k_I \end{pmatrix} $$
+Matriks generasi berikutnya adalah $K = FV^{-1}$:
+$$ K = \begin{pmatrix} 0 & \beta \\ 0 & 0 \end{pmatrix} \begin{pmatrix} 1/k_E & 0 \\ \sigma/(k_E k_I) & 1/k_I \end{pmatrix} = \begin{pmatrix} \frac{\beta \sigma}{k_E k_I} & \frac{\beta}{k_I} \\ 0 & 0 \end{pmatrix} $$
+Bilangan reproduksi dasar $R_0$ adalah radius spektral (nilai eigen dominan) dari $K$.
+Nilai eigen dari $K$ adalah $\lambda_1 = \frac{\beta \sigma}{k_E k_I}$ dan $\lambda_2 = 0$.
+Maka,
+$$ R_0 = \rho(K) = \frac{\beta \sigma}{k_E k_I} = \frac{\beta \sigma}{(\sigma + \delta + \mu)(\gamma + \theta + \mu)} $$
+Interpretasi $R_0$: Jika $R_0 < 1$, diharapkan kecanduan akan hilang dari populasi. Jika $R_0 > 1$, kecanduan akan menyebar dan menjadi endemik.
+
+\subsection{Analisis Kestabilan Titik Keseimbangan Bebas Kecanduan ($E_0^{rev}$)}
+Kestabilan lokal dari $E_0^{rev}$ ditentukan oleh nilai eigen dari matriks Jacobian $J$ dari sistem (\ref{eq:S})-(\ref{eq:R}) yang dievaluasi pada $E_0^{rev}$.
+$$ J = \begin{pmatrix}
+\frac{\partial \dot{S}}{\partial S} & \frac{\partial \dot{S}}{\partial E} & \frac{\partial \dot{S}}{\partial I} & \frac{\partial \dot{S}}{\partial R} \\
+\frac{\partial \dot{E}}{\partial S} & \frac{\partial \dot{E}}{\partial E} & \frac{\partial \dot{E}}{\partial I} & \frac{\partial \dot{E}}{\partial R} \\
+\frac{\partial \dot{I}}{\partial S} & \frac{\partial \dot{I}}{\partial E} & \frac{\partial \dot{I}}{\partial I} & \frac{\partial \dot{I}}{\partial R} \\
+\frac{\partial \dot{R}}{\partial S} & \frac{\partial \dot{R}}{\partial E} & \frac{\partial \dot{R}}{\partial I} & \frac{\partial \dot{R}}{\partial R}
+\end{pmatrix}_{E_0^{rev}} $$
+Pada $E_0^{rev} = (\Lambda/\mu, 0, 0, 0)$ dan $N \approx \Lambda/\mu$:
+$\frac{\partial}{\partial S}(\frac{\beta SI}{N})|_{E_0^{rev}} = \frac{\beta I}{N}|_{E_0^{rev}} - \frac{\beta SI}{N^2}|_{E_0^{rev}} = 0$ (karena $I=0$)
+$\frac{\partial}{\partial E}(\frac{\beta SI}{N})|_{E_0^{rev}} = -\frac{\beta SI}{N^2}|_{E_0^{rev}} = 0$
+$\frac{\partial}{\partial I}(\frac{\beta SI}{N})|_{E_0^{rev}} = \frac{\beta S}{N}|_{E_0^{rev}} - \frac{\beta SI}{N^2}|_{E_0^{rev}} = \frac{\beta (\Lambda/\mu)}{(\Lambda/\mu)} = \beta$
+$\frac{\partial}{\partial R}(\frac{\beta SI}{N})|_{E_0^{rev}} = -\frac{\beta SI}{N^2}|_{E_0^{rev}} = 0$
+
+Maka, matriks Jacobian pada $E_0^{rev}$ adalah:
+$$ J(E_0^{rev}) = \begin{pmatrix}
+-\mu & 0 & -\beta & 0 \\
+0 & -(\sigma+\delta+\mu) & \beta & 0 \\
+0 & \sigma & -(\gamma+\theta+\mu) & 0 \\
+0 & \delta & \gamma+\theta & -\mu
+\end{pmatrix} $$
+$$ J(E_0^{rev}) = \begin{pmatrix}
+-\mu & 0 & -\beta & 0 \\
+0 & -k_E & \beta & 0 \\
+0 & \sigma & -k_I & 0 \\
+0 & \delta & k_I - \mu & -\mu
+\end{pmatrix} $$
+(Catatan: $\gamma+\theta = k_I - \mu$)
+
+Nilai eigen $\lambda$ dari $J(E_0^{rev})$ diperoleh dari $\det(J(E_0^{rev}) - \lambda I) = 0$.
+Dua nilai eigen dapat langsung terlihat: $\lambda_1 = -\mu$ dan $\lambda_2 = -\mu$. Keduanya negatif (karena $\mu > 0$).
+Dua nilai eigen lainnya berasal dari submatriks $2 \times 2$ di tengah (untuk kompartemen $E$ dan $I$):
+$$ J_{EI} = \begin{pmatrix} -k_E & \beta \\ \sigma & -k_I \end{pmatrix} $$
+Persamaan karakteristiknya adalah $\det(J_{EI} - \lambda I) = 0$:
+$$ (-k_E - \lambda)(-k_I - \lambda) - \beta\sigma = 0 $$
+$$ \lambda^2 + (k_E + k_I)\lambda + k_E k_I - \beta\sigma = 0 $$
+$$ \lambda^2 + (k_E + k_I)\lambda + k_E k_I \left(1 - \frac{\beta\sigma}{k_E k_I}\right) = 0 $$
+$$ \lambda^2 + (k_E + k_I)\lambda + k_E k_I (1 - R_0) = 0 $$
+Berdasarkan kriteria Routh-Hurwitz, akar-akar dari persamaan kuadrat $ax^2+bx+c=0$ memiliki bagian real negatif jika dan hanya jika $a, b, c$ memiliki tanda yang sama (jika $a>0$, maka $b>0$ dan $c>0$).
+Di sini, $a=1 > 0$.
+Koefisien $b = k_E + k_I = (\sigma+\delta+\mu) + (\gamma+\theta+\mu)$. Karena semua parameter laju positif, maka $b > 0$.
+Koefisien $c = k_E k_I (1 - R_0)$. Karena $k_E > 0$ dan $k_I > 0$, maka tanda $c$ bergantung pada $(1 - R_0)$.
+Agar $c > 0$, maka $1 - R_0 > 0$, yang berarti $R_0 < 1$.
+
+Jadi, semua nilai eigen dari $J(E_0^{rev})$ memiliki bagian real negatif jika dan hanya jika $R_0 < 1$. Ini berarti titik keseimbangan bebas kecanduan $E_0^{rev}$ adalah stabil secara lokal asimtotik jika $R_0 < 1$. Jika $R_0 > 1$, maka $E_0^{rev}$ menjadi tidak stabil, dan kecanduan dapat menyebar dalam populasi menuju titik keseimbangan endemik.
+
+\section{Diskusi}
+Model yang direvisi ini memberikan kerangka kerja yang lebih sesuai dengan teori epidemiologi standar. Pengenalan faktor interaksi sosial ($\beta SI/N$) dalam penularan kecanduan dan jalur pemulihan dini ($\delta E$) menawarkan representasi yang lebih kaya akan dinamika kecanduan game online.
+Bilangan reproduksi dasar ($R_0$) yang diturunkan, yaitu $R_0 = \frac{\beta \sigma}{(\sigma + \delta + \mu)(\gamma + \theta + \mu)}$, kini memiliki interpretasi yang jelas sebagai ambang batas. Jika $R_0 < 1$, intervensi yang bertujuan mengurangi $\beta$ atau $\sigma$, atau meningkatkan $\delta, \gamma, \theta, \mu$ dapat efektif dalam menghilangkan kecanduan. Sebaliknya, jika $R_0 > 1$, kecanduan akan cenderung bertahan.
+Analisis kestabilan menunjukkan bahwa titik keseimbangan bebas kecanduan stabil jika $R_0 < 1$, yang konsisten dengan interpretasi $R_0$. Hal ini mengatasi ambiguitas yang ada pada analisis model asli.
+
+\section{Kesimpulan Revisi}
+Revisi model SEIR untuk kecanduan game online dengan memasukkan mekanisme transmisi berbasis interaksi sosial dan kemungkinan pemulihan dini dari tahap terpapar telah menghasilkan model dengan analisis yang lebih konsisten secara teoretis.
+\begin{enumerate}
+    \item Model matematika yang direvisi adalah:
+        \begin{align*}
+        \frac{dS}{dt} &= \Lambda - \frac{\beta S I}{N} - \mu S \\
+        \frac{dE}{dt} &= \frac{\beta S I}{N} - (\sigma + \delta + \mu)E \\
+        \frac{dI}{dt} &= \sigma E - (\gamma + \theta + \mu)I \\
+        \frac{dR}{dt} &= \delta E + (\gamma + \theta)I - \mu R
+        \end{align*}
+    \item Titik keseimbangan bebas kecanduan yang direvisi adalah $E_0^{rev} = (\Lambda/\mu, 0, 0, 0)$.
+    \item Bilangan reproduksi dasar yang baru adalah $R_0 = \frac{\beta \sigma}{(\sigma + \delta + \mu)(\gamma + \theta + \mu)}$.
+    \item Titik keseimbangan bebas kecanduan $E_0^{rev}$ stabil secara lokal asimtotik jika $R_0 < 1$, dan tidak stabil jika $R_0 > 1$.
+\end{enumerate}
+Hasil ini memberikan dasar yang lebih kuat untuk memahami dinamika penyebaran kecanduan game online dan merancang strategi pengendalian yang efektif. Penelitian lebih lanjut dapat melibatkan estimasi parameter untuk model yang direvisi ini menggunakan data nyata dan melakukan analisis sensitivitas parameter terhadap $R_0$.
+
+% \section*{Daftar Pustaka}
+% (Daftar pustaka akan sama atau disesuaikan dari paper asli dan literatur terkait pemodelan epidemiologi)
+% \begin{thebibliography}{9}
+%     \bibitem{Side2020}
+%     Side, S., Muzakir, N. A., Pebriani, D., \& Utari, S. N. (2020). Model SEIR Kecanduan Game Online pada Siswa di SMP Negeri 3 Makassar. \textit{Jurnal Sainsmat}, \textit{IX}(1), 91-102.
+%     \bibitem{VandenDriessche2002}
+%     Van den Driessche, P., \& Watmough, J. (2002). Reproduction numbers and sub-threshold endemic equilibria for compartmental models of disease transmission. \textit{Mathematical biosciences}, \textit{180}(1-2), 29-48.
+% \end{thebibliography}
+
+\end{document}

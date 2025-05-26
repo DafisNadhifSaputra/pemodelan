@@ -13,10 +13,12 @@ interface ParameterControlsProps {
   initialConditions: InitialConditions;
   simulationDuration: number;
   hasIntervention: boolean;
+  showEquilibrium: boolean;
   onParamChange: <K extends SearParameterKey,>(paramName: K, value: number) => void;
   onInitialConditionChange: <K extends InitialConditionKey,>(conditionName: K, value: number) => void;
   onSimulationDurationChange: (duration: number) => void;
   onInterventionChange: (hasIntervention: boolean) => void;
+  onEquilibriumToggle: (show: boolean) => void;
   onReset: () => void;
   N_initial: number;
 }
@@ -105,10 +107,12 @@ const ParameterControls: React.FC<ParameterControlsProps> = ({
   initialConditions,
   simulationDuration,
   hasIntervention,
+  showEquilibrium,
   onParamChange,
   onInitialConditionChange,
   onSimulationDurationChange,
   onInterventionChange,
+  onEquilibriumToggle,
   onReset,
   N_initial
 }) => {
@@ -277,6 +281,52 @@ const ParameterControls: React.FC<ParameterControlsProps> = ({
         <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
           <InlineMath math="\theta" /> (Faktor Laju Pemulihan dengan Intervensi): {hasIntervention ? THETA_WITH_INTERVENTION : THETA_WITHOUT_INTERVENTION}
         </p>
+      </div>
+
+      {/* Equilibrium Analysis Toggle */}
+      <div>
+        <h3 className="text-lg font-semibold text-blue-600 dark:text-sky-400 mb-3 border-b border-slate-300 dark:border-slate-700 pb-2">Analisis Titik Keseimbangan</h3>
+        <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-700/50 p-3 rounded-md">
+          <label htmlFor="equilibriumToggle" className="text-sm font-medium text-blue-600 dark:text-sky-300">
+            Tampilkan Analisis Equilibrium
+          </label>
+          <button
+            type="button"
+            id="equilibriumToggle"
+            onClick={() => onEquilibriumToggle(!showEquilibrium)}
+            className={`${
+              showEquilibrium ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-600'
+            } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800`}
+            role="switch"
+            aria-checked={showEquilibrium}
+            aria-label="Tampilkan Analisis Equilibrium"
+          >
+            <span className="sr-only">Tampilkan Analisis Equilibrium</span>
+            <span
+              aria-hidden="true"
+              className={`${
+                showEquilibrium ? 'translate-x-5' : 'translate-x-0'
+              } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+            />
+          </button>
+        </div>
+        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+          Menampilkan titik keseimbangan endemik teoretis dari model SEAR dan estimasi waktu konvergensi.
+        </p>
+        {showEquilibrium && (
+          <div className="mt-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded border border-purple-200 dark:border-purple-700">
+            <p className="text-xs text-purple-700 dark:text-purple-300">
+              <strong>Mode Aktif:</strong> Simulasi akan disesuaikan untuk mengarahkan ke titik keseimbangan endemik. 
+              Kondisi awal akan dimodifikasi agar hasil simulasi konvergen ke equilibrium endemik yang diharapkan.
+            </p>
+            <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded border border-amber-200 dark:border-amber-700">
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                <strong>Catatan Matematis:</strong> Model SEAR dengan transmisi kontinu (α &gt; 0) hanya memiliki keseimbangan endemik. 
+                "Keseimbangan bebas penyakit" tidak valid secara matematis karena dE/dt = αS ≠ 0 ketika E = 0 dan S &gt; 0.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </form>
   );

@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback, lazy } from 'react';
 
 import { DEFAULT_PARAMS, DEFAULT_INITIAL_CONDITIONS, DEFAULT_SIMULATION_DURATION_MONTHS, TIME_STEP, THETA_WITH_INTERVENTION, THETA_WITHOUT_INTERVENTION } from './constants';
-import type { SearParams, InitialConditions, SimulationDataPoint, SearParameterKey, InitialConditionKey, AiInterpretationResponse } from './types';
+import type { SearParams, InitialConditions, SimulationDataPoint, SearParameterKey, InitialConditionKey, AiInterpretationResponse, EquilibriumAnalysis } from './types';
 import { runSearSimulation } from './services/seirSimulator';
+import { runEquilibriumSimulation, isEquilibriumMode, getEquilibriumType } from './services/equilibriumSimulator';
 import { getAiInterpretation, getAiChartAnalysis } from './services/geminiService';
+import { calculateEquilibrium } from './utils/equilibriumAnalysis';
 import ParameterControls from './components/ParameterControls';
 import SearModelInfo from './components/SeirModelInfo';
+import EquilibriumDisplay from './components/EquilibriumDisplay';
 import ThemeToggle from './components/ThemeToggle';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LoadingProvider } from './contexts/LoadingContext';
@@ -20,7 +23,7 @@ const PaperModal = lazy(() => import('./components/PaperModal'));
 const AiChatModal = lazy(() => import('./components/AiChatModal'));
 const JournalPage = lazy(() => import('./components/JournalPage'));
 
-// Import SimulationChart directly to avoid lazy loading issues
+// Import components directly to avoid lazy loading issues
 import SimulationChart from './components/SimulationChart';
 
 
@@ -35,6 +38,10 @@ const AppContent: React.FC = () => {
   const [simulationDuration, setSimulationDuration] = useState<number>(DEFAULT_SIMULATION_DURATION_MONTHS);
   const [simulationData, setSimulationData] = useState<SimulationDataPoint[]>([]);
   const [currentR0, setCurrentR0] = useState<number>(0);
+
+  // Equilibrium analysis state
+  const [showEquilibrium, setShowEquilibrium] = useState<boolean>(false);
+  const [equilibriumAnalysis, setEquilibriumAnalysis] = useState<EquilibriumAnalysis | null>(null);
 
   const [isPaperModalOpen, setIsPaperModalOpen] = useState<boolean>(false);
   const [isAiChatOpen, setIsAiChatOpen] = useState<boolean>(false);
@@ -66,6 +73,7 @@ const AppContent: React.FC = () => {
       setSimulationData([{ time: 0, S: initialConditions.S0, E: initialConditions.E0, A: initialConditions.A0, R: initialConditions.R0 }]);
       setCurrentR0(0);
       setAiInterpretation(null);
+      setEquilibriumAnalysis(null);
       // Clear AI-specific error, let chart show its message
       setInterpretationError(null); 
       return;
@@ -73,16 +81,40 @@ const AppContent: React.FC = () => {
     // Clear previous errors if simulation is runnable
     setInterpretationError(null); 
 
-    const data = runSearSimulation(
-      params,
-      initialConditions,
-      N_val,
-      simulationDuration,
-      TIME_STEP
-    );
+    // Calculate equilibrium analysis first
+    const equilibrium = calculateEquilibrium(params, N_val);
+    setEquilibriumAnalysis(equilibrium);
+    
+    const r0 = calculateR0(params);
+    setCurrentR0(r0);
+
+    // Determine which simulator to use
+    let data: SimulationDataPoint[];
+    
+    if (isEquilibriumMode(showEquilibrium, equilibrium)) {
+      // Use equilibrium simulator when equilibrium mode is active
+      const equilibriumType = getEquilibriumType(r0);
+      data = runEquilibriumSimulation(
+        params,
+        initialConditions,
+        N_val,
+        simulationDuration,
+        TIME_STEP,
+        equilibriumType
+      );
+    } else {
+      // Use normal simulator
+      data = runSearSimulation(
+        params,
+        initialConditions,
+        N_val,
+        simulationDuration,
+        TIME_STEP
+      );
+    }
+    
     setSimulationData(data);
-    setCurrentR0(calculateR0(params));
-  }, [params, initialConditions, simulationDuration, calculateR0]);
+  }, [params, initialConditions, simulationDuration, showEquilibrium, calculateR0]);
 
   const fetchAndSetAiInterpretation = async (
     currentParams: SearParams,
@@ -117,7 +149,7 @@ const AppContent: React.FC = () => {
         setInterpretationError(interpretationResult.error || "Gagal mendapatkan interpretasi dari AI.");
       }
     } catch (error) {
-      console.error("Error fetching AI interpretation:", error);
+      console.error("Error fetching AI interpretation:", error instanceof Error ? error.message : String(error));
       setAiInterpretation(null);
       let errorMessage = "Terjadi kesalahan saat mengambil interpretasi AI.";
       if (error instanceof Error) {
@@ -161,7 +193,7 @@ const AppContent: React.FC = () => {
         setInterpretationError(interpretationResult.error || "Gagal mendapatkan analisis grafik dari AI.");
       }
     } catch (error) {
-      console.error("Error fetching AI chart analysis:", error);
+      console.error("Error fetching AI chart analysis:", error instanceof Error ? error.message : String(error));
       setAiInterpretation(null);
       let errorMessage = "Terjadi kesalahan saat mengambil analisis grafik AI.";
       if (error instanceof Error) {
@@ -212,6 +244,7 @@ const AppContent: React.FC = () => {
     setInitialConditions(DEFAULT_INITIAL_CONDITIONS);
     setSimulationDuration(DEFAULT_SIMULATION_DURATION_MONTHS);
     setHasIntervention(true);
+    setShowEquilibrium(false); // Reset equilibrium display
     // Clear AI interpretation when resetting
     setAiInterpretation(null);
     setInterpretationError(null);
@@ -280,10 +313,12 @@ const AppContent: React.FC = () => {
               initialConditions={initialConditions}
               simulationDuration={simulationDuration}
               hasIntervention={hasIntervention}
+              showEquilibrium={showEquilibrium}
               onParamChange={handleParamChange}
               onInitialConditionChange={handleInitialConditionChange}
               onSimulationDurationChange={handleSimulationDurationChange}
               onInterventionChange={setHasIntervention}
+              onEquilibriumToggle={setShowEquilibrium}
               N_initial={N_initial}
               onReset={handleReset}
             />
@@ -293,6 +328,23 @@ const AppContent: React.FC = () => {
               <InfoIcon className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Wawasan Model
             </h2>
             <SearModelInfo currentR0={currentR0} />
+            
+            {/* Equilibrium Analysis */}
+            {equilibriumAnalysis && (
+              <div className="mt-6">
+                <EquilibriumDisplay
+                  equilibriumAnalysis={equilibriumAnalysis}
+                  currentState={simulationData.length > 0 ? {
+                    S: simulationData[simulationData.length - 1].S,
+                    E: simulationData[simulationData.length - 1].E,
+                    A: simulationData[simulationData.length - 1].A,
+                    R: simulationData[simulationData.length - 1].R
+                  } : undefined}
+                  isVisible={showEquilibrium}
+                  isEquilibriumMode={isEquilibriumMode(showEquilibrium, equilibriumAnalysis)}
+                />
+              </div>
+            )}
           </div>
         </div>
 

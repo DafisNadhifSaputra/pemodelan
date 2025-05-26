@@ -31,9 +31,8 @@ function LazyComponentLoader<T = any>({
       }
 
       const module = await loader();
-      setComponent(() => module.default);
-    } catch (err) {
-      console.error('Failed to load component:', err);
+      setComponent(() => module.default);    } catch (err) {
+      console.error('Failed to load component:', err instanceof Error ? err.message : String(err));
       setError(err instanceof Error ? err.message : 'Unknown error');
       
       // Retry logic
