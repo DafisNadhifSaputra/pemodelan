@@ -1,19 +1,3 @@
-/**
- * ANALISIS KRITIK TITIK KESEIMBANGAN "BEBAS KECANDUAN" DALAM PAPER
- * 
- * MASALAH YANG DITEMUKAN:
- * Paper mengklaim ada "titik keseimbangan bebas kecanduan" E₀ = (μ₁N/(μ₂+α), 0, 0, 0)
- * 
- * NAMUN, ini TIDAK MUNGKIN menjadi equilibrium karena:
- * - Jika E = 0, maka dE/dt = αS - (β + μ₂) × 0 = αS
- * - Karena S = μ₁N/(μ₂+α) > 0, maka dE/dt = αS > 0
- * - Artinya E akan NAIK dari 0, bukan tetap di 0!
- * 
- * KESIMPULAN: 
- * Titik E₀ yang diklaim paper BUKAN equilibrium yang valid secara matematika.
- * Model SEAR dengan transmission α > 0 tidak bisa memiliki true disease-free equilibrium.
- */
-
 import { DEFAULT_PARAMS, THETA_WITH_INTERVENTION, THETA_WITHOUT_INTERVENTION } from './constants';
 import type { SearParams } from './types';
 
